@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <title>Restouz | Analytics Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        @page { size: A4; margin: 0; }
+        
+        :root {
+            --primary: #0f172a;
+            --accent: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; padding: 0; background: #cbd5e1;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .document-canvas {
+            width: 210mm; height: 297mm;
+            margin: 0 auto; background: white;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            padding: 12mm 15mm; position: relative;
+        }
+
+        /* --- PROFESSIONAL HEADER --- */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; margin-bottom: 30px;
+            border-bottom: 1.5px solid var(--primary);
+        }
+        .brand-box { display: flex; align-items: center; gap: 15px; }
+        .logo-wrapper {
+            width: 100px; height: 100px; border-radius: 50%;
+            border: 1px solid var(--border); overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .brand-info h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--primary); }
+        .brand-info p { margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+
+        .header-meta { text-align: right; }
+        .protocol-no { font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: var(--primary); }
+        .date-info { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+        /* --- ANALYTICAL STATS GRID --- */
+        .analytics-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 30px;
+        }
+        .ana-card {
+            background: #ffffff; border: 1px solid var(--border);
+            padding: 14px; border-radius: 16px; position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        .ana-card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--accent); opacity: 0.2;
+        }
+        .ana-label { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .ana-value { display: block; font-size: 18px; font-weight: 800; color: var(--primary); margin: 6px 0; }
+        .ana-unit { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+        
+        /* Mini Indicator Bar */
+        .indicator-track { width: 100%; height: 4px; background: #f1f5f9; border-radius: 2px; margin-top: 8px; }
+        .indicator-fill { height: 100%; border-radius: 2px; }
+
+        /* Specific Card Styles */
+        .card-fat { border-bottom: 3px solid var(--accent); }
+        .card-density { border-bottom: 3px solid #6366f1; }
+        .card-acidity { border-bottom: 3px solid var(--warning); }
+        .card-quality { border-bottom: 3px solid var(--success); background: #f0fdf4; }
+        .card-temp { border-bottom: 3px solid #38bdf8; }
+
+        /* --- TABLE AREA --- */
+        .section-title {
+            font-size: 11px; font-weight: 800; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1.5px;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after { content: ""; flex-grow: 1; height: 1px; background: var(--border); }
+
+        .main-table { width: 100%; border-collapse: collapse; }
+        .main-table th { 
+            text-align: left; padding: 12px; font-size: 10px; font-weight: 700; 
+            color: var(--text-muted); border-bottom: 2px solid var(--border);
+        }
+        .main-table td { padding: 14px 12px; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9; }
+
+        .progress-box { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+        .bar-bg { width: 60px; height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--accent); }
+
+        /* --- TOTAL BANNER --- */
+        .total-banner {
+            background: var(--primary); color: white; border-radius: 20px;
+            padding: 25px; display: flex; justify-content: space-between; align-items: center;
+            margin-top: auto; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+        }
+        .total-info span { font-size: 10px; font-weight: 700; opacity: 0.6; text-transform: uppercase; }
+        .total-info h2 { margin: 5px 0 0 0; font-size: 34px; font-weight: 800; }
+
+        .signature-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin: 35px 0; }
+        .sig-item { border-top: 1.5px solid var(--border); padding-top: 10px; }
+        .sig-label { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .sig-name { font-size: 12px; font-weight: 700; color: var(--primary); margin-top: 4px; }
+
+        .footer {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            border-top: 1px solid var(--border); padding-top: 15px; font-size: 9px; color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<% 
+    let totalVol = 0;
+    if (data.distribution) {
+        totalVol = Object.values(data.distribution).reduce((a, b) => a + (Number(b) || 0), 0);
+    }
+%>
+
+<div class="document-canvas">
+    <header class="header">
+        <div class="brand-box">
+            <div class="logo-wrapper">
+                <img src="https://logowik.com/content/uploads/images/unit3554.logowik.com.webp" alt="Logo">
+            </div>
+            <div class="brand-info">
+                <h1>Laboratoriya xulosasi</h1>
+                <p>Industrial Analytical Intelligence</p>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="protocol-no">№ <%= data.partyNumber %></div>
+            <div class="date-info">
+                <%= new Date(data.createdAt).toLocaleDateString('uz-UZ', {day: '2-digit', month: 'long', year: 'numeric'}) %> | 
+                <%= new Date(data.createdAt).toLocaleTimeString('uz-UZ', {hour: '2-digit', minute: '2-digit'}) %>
+            </div>
+        </div>
+    </header>
+
+    <section class="analytics-grid">
+        <div class="ana-card card-fat">
+            <span class="ana-label">Yog'lilik</span>
+            <span class="ana-value"><%= data.results?.fat || '0.00' %><span class="ana-unit">%</span></span>
+            <div class="indicator-track"><div class="indicator-fill" style="width: 75%; background: var(--accent);"></div></div>
+        </div>
+
+        <div class="ana-card card-density">
+            <span class="ana-label">Zichlik</span>
+            <span class="ana-value"><%= data.results?.density || '1.028' %></span>
+            <div class="indicator-track"><div class="indicator-fill" style="width: 85%; background: #6366f1;"></div></div>
+        </div>
+
+        <div class="ana-card card-acidity">
+            <span class="ana-label">Kislotalilik</span>
+            <span class="ana-value"><%= data.results?.acidity || '17.0' %><span class="ana-unit">°T</span></span>
+            <div class="indicator-track"><div class="indicator-fill" style="width: 40%; background: var(--warning);"></div></div>
+        </div>
+
+        <div class="ana-card card-quality">
+            <span class="ana-label">Sifat Klassi</span>
+            <span class="ana-value" style="color: var(--success); font-size: 14px;"><%= data.results?.quality || 'Premimum' %></span>
+            <div class="indicator-track"><div class="indicator-fill" style="width: 100%; background: var(--success);"></div></div>
+        </div>
+
+        <div class="ana-card card-temp">
+            <span class="ana-label">Harorat</span>
+            <span class="ana-value">4.2<span class="ana-unit">°C</span></span>
+            <div class="indicator-track"><div class="indicator-fill" style="width: 20%; background: #38bdf8;"></div></div>
+        </div>
+    </section>
+
+    <main style="flex-grow: 1;">
+        <div class="section-title">Ishlab chiqarish taqsimoti analitikasi</div>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th width="40">№</th>
+                    <th>Mahsulot nomi</th>
+                    <th style="text-align: right;">Hajm (litr)</th>
+                    <th style="text-align: right;">Ulush (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (data.distribution) { %>
+                    <% Object.entries(data.distribution).forEach(([name, val], index) => { 
+                        let v = Number(val) || 0;
+                        let p = totalVol > 0 ? ((v / totalVol) * 100).toFixed(1) : 0;
+                    %>
+                    <tr>
+                        <td style="font-family: 'JetBrains Mono'; color: var(--text-muted); font-size: 11px;"><%= (index + 1).toString().padStart(2, '0') %></td>
+                        <td style="text-transform: uppercase; font-size: 12px; letter-spacing: 0.3px;"><%= name %></td>
+                        <td style="text-align: right; font-weight: 800; color: var(--primary);"><%= v.toLocaleString() %></td>
+                        <td>
+                            <div class="progress-box">
+                                <span style="font-size: 11px; font-weight: 800;"><%= p %>%</span>
+                                <div class="bar-bg"><div class="bar-fill" style="width: <%= p %>%"></div></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </main>
+
+    <div class="total-banner">
+        <div class="total-info">
+            <span>Umumiy partya hajmi</span>
+            <h2><%= totalVol.toLocaleString() %> <small style="font-size: 18px; opacity: 0.5; font-weight: 400;">LITR</small></h2>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-family: 'JetBrains Mono'; font-size: 12px; letter-spacing: 1px; margin-bottom: 5px;">VERIFIED REPORT</div>
+            <div style="font-size: 10px; opacity: 0.6;">Tizim ID: <%= data._id.toString().toUpperCase() %></div>
+        </div>
+    </div>
+
+    <section class="signature-section">
+        <div class="sig-item">
+            <div class="sig-label">Mas'ul Laborant</div>
+            <div class="sig-name"><%= data.author?.fullname %></div>
+        </div>
+        <div class="sig-item">
+            <div class="sig-label">Bosh Texnolog</div>
+                        <div class="sig-name"><%= data.author?.fullname %></div>
+
+        </div>
+        <div class="sig-item">
+            <div class="sig-label">Direktorat</div>
+                        <div class="sig-name"><%= data.author?.fullname %></div>
+
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<%= data._id %>" width="80" style="border-radius: 4px;">
+            <div>
+                <strong>Restouz Digital Protocol</strong><br>
+                Ushbu hujjat ERP tizimi orqali avtomatik shakllantirilgan.
+            </div>
+        </div>
+        <div style="text-align: right;">
+            Restouz - Tabiiatning mehirli ta'mi © 2026<br>
+            Quality Control Dept. | v8.5 Analytics
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>

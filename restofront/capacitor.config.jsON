@@ -1,0 +1,6 @@
+{
+  "appId": "resto.uz.app",
+  "appName": "Resto Uz",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
