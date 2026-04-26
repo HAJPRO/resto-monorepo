@@ -211,8 +211,8 @@ const onFinish = async () => {
             <Input 
               v-model="model_payment[f.k]" 
               type="number" 
-              class="w-full font-mono font-black text-lg" 
               @focus="$event.target.select()"
+              clearable
             />
           </div>
         </div>
