@@ -1,6 +1,6 @@
 {
   "name": "restoback",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Restouza uchun backend",
   "main": "index.js",
   "scripts": {
