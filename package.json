@@ -1,0 +1,11 @@
+{
+  "name": "resto-monorepo",
+  "private": true,
+  "workspaces": [
+    "restoback",
+    "restofront"
+  ],
+  "devDependencies": {
+    "lerna": "^9.0.7"
+  }
+}

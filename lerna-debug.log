@@ -1,0 +1,14 @@
+0 silly argv {
+0 silly argv   _: [ 'ls' ],
+0 silly argv   lernaVersion: '9.0.7',
+0 silly argv   '$0': 'node_modules\\lerna\\dist\\cli.js'
+0 silly argv }
+1 notice cli v9.0.7
+2 verbose packageConfigs Explicit "packages" configuration found in lerna.json. Resolving packages using the configured glob(s): ["restoback","restofront"]
+3 verbose rootPath C:\Users\Dell\Desktop\restoapp\restoapps
+4 error SyntaxError: C:\Users\Dell\Desktop\restoapp\restoapps\restoback\package.json: Expected double-quoted property name in JSON at position 163 (line 9 column 3)
+4 error     at JSON.parse (<anonymous>)
+4 error     at _readFile (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\jsonfile\index.js:25:16)
+4 error     at async Promise.all (index 1)
+4 error     at async createProjectGraphWithPackages (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:3224:18)
+4 error     at async detectProjects (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:3346:24)
