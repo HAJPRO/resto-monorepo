@@ -89,7 +89,7 @@ export const StatisticsStore = defineStore('StatisticsStore', {
      */
     async setFilter(newFilter) {
       this.activeFilter = newFilter;
-      // Filter o'zgarganda range'siz so'rov yuboramiz///
+      // Filter o'zgarganda range'siz so'rov yuboramiz
       
       await this.fetchAllStats(); 
     },
