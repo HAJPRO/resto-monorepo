@@ -353,7 +353,15 @@ class StatisticsService {
         }
       }
     ]);
-
+console.log( {
+        stats: { 
+          closedCount, 
+          activeCount,
+          growth: 12 // Bu yerda mantiqiy o'sish foizini qo'shishingiz mumkin
+        },
+        topStaff,
+        topDishes
+      })
     return {
       success: true,
       data: {
