@@ -25,29 +25,71 @@ class OrderService {
 
     throw new BaseError("Noto'g'ri action: " + action, 400);
 }
-  async GetAll(req) {
+ async GetAll(req) {
     const { Cart } = req.tenantModels;
+    const { page = 1, limit = 10, filterType, startDate, endDate } = req.body;
 
-    const data = await Cart.find()
-        .populate('customerId')
-        .populate('staffId')
-        .populate({
-            path: 'tableId',
-            populate: {
-                path: 'cartId', // Stol ichidagi savatni ochish
-                model: 'Cart'   // Model nomini aniq ko'rsatish tavsiya etiladi
-            }
-        })
-        .sort({ createdAt: -1 }) // Eng yangi buyurtmalar yuqorida turishi uchun
-        .lean();
+    // 1. Filtr mantiqini qurish
+    let query = {};
 
-    return { 
-        success: true,
-        msg: "Barcha buyurtmalar", 
-        data 
+    // Agar frontenddan startDate va endDate kelsa (Custom range)
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+      };
+    } 
+    // Agar tayyor filterType kelsa (Kun, Hafta, Oy...)
+    else if (filterType) {
+      const now = new Date();
+      if (filterType === 'Kun') {
+        query.createdAt = {
+          $gte: new Date(now.setHours(0, 0, 0, 0)),
+          $lte: new Date(now.setHours(23, 59, 59, 999))
+        };
+      } else if (filterType === 'Hafta') {
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        query.createdAt = { $gte: new Date(startOfWeek.setHours(0,0,0,0)) };
+      } else if (filterType === 'Oy') {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        query.createdAt = { $gte: startOfMonth };
+      } else if (filterType === 'Yil') {
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        query.createdAt = { $gte: startOfYear };
+      }
+    }
+
+    // 2. Pagination va Data yuklash
+    const skip = (page - 1) * limit;
+    
+    const data = await Cart.find(query)
+      .populate('customerId')
+      .populate('staffId')
+      .populate({
+        path: 'tableId',
+        populate: { path: 'cartId', model: 'Cart' }
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Jami elementlar soni (Frontendda 'hasMore' uchun kerak)
+    const total = await Cart.countDocuments(query);
+
+    return {
+      success: true,
+      msg: "Buyurtmalar ro'yxati",
+      data: {
+        data,
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit)
+      }
     };
-}
-     async GetById(req) {
+  }
+  async GetById(req) {
     const { Menu } = req.tenantModels;
     const data = await Menu.findById(req.params.id)
         .populate('bookings') // 'bookings' maydonini populate qilamiz
@@ -58,6 +100,7 @@ class OrderService {
         data 
     };
 }
+
 /**
  * To'lovni yakunlash va orderni yopish
  * @param {Object} req - Request object

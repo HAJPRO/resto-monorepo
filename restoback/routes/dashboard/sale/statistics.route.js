@@ -33,5 +33,12 @@ router.get(
   tenantMiddleware, 
   StatisticsController.GetTopCustomers
 );
+//home stat
+
+router.get(
+  "/home", 
+  tenantMiddleware, 
+  StatisticsController.GetHomeStats
+);
 
 module.exports = router;

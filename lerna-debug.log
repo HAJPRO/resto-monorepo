@@ -19,8 +19,8 @@
 14 info Assuming all packages changed
 15 verbose updated restoback
 16 verbose updated restofront
-17 verbose git-describe undefined => "ad2c748"
-18 silly git-describe parsed => {"refCount":"2","sha":"ad2c748","isDirty":false}
+17 verbose git-describe undefined => "e4b8834"
+18 silly git-describe parsed => {"refCount":"3","sha":"e4b8834","isDirty":false}
 19 info execute Skipping releases
 20 silly lifecycle No script for "preversion" in "resto-monorepo", continuing
 21 silly lifecycle No script for "preversion" in "restoback", continuing
@@ -29,38 +29,17 @@
 24 silly lifecycle No script for "version" in "restofront", continuing
 25 silly lifecycle No script for "version" in "resto-monorepo", continuing
 26 verbose version Updating root package-lock.json
-27 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
-27 error npm error code ERESOLVE
-27 error npm error ERESOLVE unable to resolve dependency tree
-27 error npm error
-27 error npm error While resolving: restofront@1.0.2
-27 error npm error Found: @capacitor/core@8.3.1
-27 error npm error node_modules/@capacitor/core
-27 error npm error   @capacitor/core@"^8.2.0" from restofront@1.0.2
-27 error npm error   restofront
-27 error npm error     restofront@1.0.2
-27 error npm error     node_modules/restofront
-27 error npm error       workspace restofront from the root project
-27 error npm error
-27 error npm error Could not resolve dependency:
-27 error npm error peer @capacitor/core@"^6.0.0" from capacitor-usb-serial@1.0.3
-27 error npm error node_modules/capacitor-usb-serial
-27 error npm error   capacitor-usb-serial@"^1.0.3" from restofront@1.0.2
-27 error npm error   restofront
-27 error npm error     restofront@1.0.2
-27 error npm error     node_modules/restofront
-27 error npm error       workspace restofront from the root project
-27 error npm error
-27 error npm error Fix the upstream dependency conflict, or retry
-27 error npm error this command with --force or --legacy-peer-deps
-27 error npm error to accept an incorrect (and potentially broken) dependency resolution.
-27 error npm error
-27 error npm error
-27 error npm error For a full report see:
-27 error npm error C:\Users\Dell\AppData\Local\npm-cache\_logs\2026-04-26T17_07_40_074Z-eresolve-report.txt
-27 error npm error A complete log of this run can be found in: C:\Users\Dell\AppData\Local\npm-cache\_logs\2026-04-26T17_07_40_074Z-debug-0.log
-27 error     at makeError (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\lib\error.js:59:11)
-27 error     at handlePromise (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\index.js:114:26)
-27 error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-27 error     at async VersionCommand.updatePackageVersions (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9807:13)
-27 error     at async Promise.all (index 0)
+27 silly gitAdd [
+27 silly gitAdd   'restoback/package.json',
+27 silly gitAdd   'restoback/package-lock.json',
+27 silly gitAdd   'restofront/package.json',
+27 silly gitAdd   'restofront/package-lock.json',
+27 silly gitAdd   'package-lock.json'
+27 silly gitAdd ]
+28 error Error: Command failed with exit code 128: git add -- restoback/package.json restoback/package-lock.json restofront/package.json restofront/package-lock.json package-lock.json
+28 error fatal: Pathspec 'restofront/package.json' is in submodule 'restofront'
+28 error     at makeError (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\lib\error.js:59:11)
+28 error     at handlePromise (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\index.js:114:26)
+28 error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+28 error     at async VersionCommand.updatePackageVersions (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9821:11)
+28 error     at async Promise.all (index 0)
