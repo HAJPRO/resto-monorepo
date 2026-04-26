@@ -19,8 +19,8 @@
 14 info Assuming all packages changed
 15 verbose updated restoback
 16 verbose updated restofront
-17 verbose git-describe undefined => "e4b8834"
-18 silly git-describe parsed => {"refCount":"3","sha":"e4b8834","isDirty":false}
+17 verbose git-describe undefined => "406a6ea"
+18 silly git-describe parsed => {"refCount":"5","sha":"406a6ea","isDirty":false}
 19 info execute Skipping releases
 20 silly lifecycle No script for "preversion" in "resto-monorepo", continuing
 21 silly lifecycle No script for "preversion" in "restoback", continuing
