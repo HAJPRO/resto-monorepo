@@ -4,5 +4,14 @@
   "packages": [
     "restoback",
     "restofront"
-  ]
+  ],
+  "npmClient": "npm",
+  "command": {
+    "version": {
+      "npmClientArgs": ["--legacy-peer-deps"]
+    },
+    "bootstrap": {
+      "npmClientArgs": ["--legacy-peer-deps"]
+    }
+  }
 }
