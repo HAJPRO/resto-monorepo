@@ -2,22 +2,41 @@
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { TabelStore } from "../../stores/index.store"; 
-import { Button, Modal, Input } from "../../UI/UI"; 
+import { Button, Modal, Keyboard } from "../../UI/UI"; 
 
 const store_tabel = TabelStore();
 const { isPaymentModal, model_payment, activeTable } = storeToRefs(store_tabel);
-console.log(activeTable.value);
 
+// Rejimlar boshqaruvi
 const activeTab = ref('single'); 
 const selectedMethod = ref('cash');
 
+// --- SMART KEYBOARD LOGIC ---
+const keyboardShow = ref(false);
+const activeField = ref(null);
+
+const openKeyboard = (field) => {
+  activeField.value = field;
+  keyboardShow.value = true;
+};
+
+const keyboardValue = computed({
+  get: () => model_payment.value[activeField.value]?.toString() || '',
+  set: (val) => {
+    if (activeField.value) {
+      model_payment.value[activeField.value] = val;
+    }
+  }
+});
+
+// --- PRICE FORMATTING & CALCULATIONS ---
 const formatPrice = (v) => new Intl.NumberFormat('uz-UZ').format(v || 0) + " so'm";
 
 const cart = computed(() => activeTable.value?.cartId || {});
 const grandTotal = computed(() => cart.value.finalTotal || 0);
 const customerBalance = computed(() => cart.value?.customerId?.balance || 0);
 
-// JAMI TO'LANGAN SUMMA (Balansni ham qo'shdik)
+// Barcha to'lov turlari yig'indisi
 const totalPaid = computed(() => {
   const p = model_payment.value;
   return (Number(p.cash) || 0) + 
@@ -30,13 +49,13 @@ const totalPaid = computed(() => {
 const remaining = computed(() => Math.max(0, grandTotal.value - totalPaid.value));
 const surplus = computed(() => Math.max(0, totalPaid.value - grandTotal.value));
 
-// TEZKOR REJIMDA AVTOMATIK TO'LDIRISH
+// --- AUTO-FILL WATCHER (Tezkor rejim uchun) ---
 watch([activeTab, selectedMethod, isPaymentModal], () => {
   if (activeTab.value === 'single' && isPaymentModal.value) {
     const methods = ['cash', 'card', 'terminal', 'debt', 'balance'];
     methods.forEach(m => {
       if (m === selectedMethod.value) {
-        // Agar balans tanlansa, jami hisob va mavjud balansning kichigini oladi
+        // Balans tanlansa, hisob va balansning eng kichigini oladi
         model_payment.value[m] = m === 'balance' 
           ? Math.min(grandTotal.value, customerBalance.value) 
           : grandTotal.value;
@@ -47,7 +66,7 @@ watch([activeTab, selectedMethod, isPaymentModal], () => {
   }
 }, { immediate: true });
 
-// Yakunlashga tayyorlik tekshiruvi
+// --- VALIDATION ---
 const isReady = computed(() => {
   const isAmountMet = totalPaid.value >= grandTotal.value || model_payment.value.debt > 0;
   const isCustomerNeeded = (model_payment.value.debt > 0 || model_payment.value.balance > 0);
@@ -69,60 +88,62 @@ const onFinish = async () => {
     no-padding
     :title="`Stol №${activeTable?.number}`"
   >
-    <div class="bg-slate-100 dark:bg-slate-950 rounded-xl p-3 space-y-4">
+    <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-4 space-y-5 pb-12">
       
       <div class="grid grid-cols-2 gap-3">
-       <div class="flex items-center gap-3 p-2 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md rounded-[22px] border border-white dark:border-white/5 shadow-sm transition-all duration-300">
+       <div class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all group">
   
   <div class="relative shrink-0">
-    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-      <i class="fa-solid fa-user-gear text-white text-sm"></i>
+    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-200/50 dark:border-white/10">
+      <i class="fa-solid fa-user-gear text-indigo-500/80 text-sm"></i>
     </div>
-    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+    <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></div>
   </div>
 
   <div class="flex flex-col min-w-0 flex-1">
-    <div class="flex items-center justify-between gap-2 mb-0.5">
-      <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
         {{ cart?.staffId?.firstname || 'Admin' }}
-      </span>
-      <span class="text-[7px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-500/10 px-1.5 py-0.5 rounded-md">
-        Xodim
       </span>
     </div>
     
-    <div class="flex items-center gap-1.5">
-      <i class="fa-solid fa-star text-[9px] text-amber-400"></i>
-      <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 leading-none">
-        Xizmat ko'rsatmoqda
-      </span>
+    <div class="flex items-center gap-1.5 mt-0.5">
+      <div class="flex items-center justify-center px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10">
+        <i class="fa-solid fa-shield-halved text-[7px] text-indigo-500 mr-1"></i>
+        <span class="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">
+          Xizmatda
+        </span>
+      </div>
     </div>
   </div>
 </div>
 
-       <div v-if="cart?.customerId" 
-     class="flex items-center gap-3 p-2 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md rounded-[22px] border border-white dark:border-white/5 shadow-sm transition-all duration-300">
+     <div v-if="cart?.customerId" class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all group">
   
   <div class="relative shrink-0">
-    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-lg shadow-amber-500/20">
-      <i class="fa-solid fa-user-tie text-white text-sm"></i>
+    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-200/50 dark:border-white/10 group-hover:scale-105 transition-transform duration-300">
+      <i class="fa-solid fa-user-tie text-slate-600 dark:text-slate-300 text-sm"></i>
     </div>
-    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></div>
+    <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
   </div>
 
   <div class="flex flex-col min-w-0 flex-1">
-    <div class="flex items-center justify-between gap-2 mb-0.5">
-      <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight">
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
         {{ cart?.customerId?.name }}
       </span>
-      <span class="text-[7px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded-md">
-        Mijoz
+      <span class="text-[7px] font-black bg-amber-100 dark:bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-md uppercase tracking-tighter">
+        {{  cart?.customerId?.status}}
       </span>
+       
     </div>
     
-    <div class="flex items-center gap-1.5">
-      <i class="fa-solid fa-wallet text-[9px] text-slate-400"></i>
-      <span class="text-[10px] font-bold tracking-tight"
+    <div class="flex items-center gap-1.5 mt-0.5">
+      <div class="flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 dark:bg-white/10">
+        <i class="fa-solid fa-wallet text-[8px]" 
+           :class="customerBalance < 0 ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'"></i>
+      </div>
+      <span class="text-[10px] font-bold tracking-tight leading-none"
             :class="customerBalance < 0 ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'">
         {{ formatPrice(customerBalance) }}
       </span>
@@ -131,132 +152,174 @@ const onFinish = async () => {
 </div>
       </div>
 
-      <div class="relative overflow-hidden bg-indigo-600 rounded-[32px] p-6 shadow-xl group">
-       <div class="grid grid-cols-1 gap-1.5 border-b border-white/10 pb-3">
-            <div class="flex justify-between items-center text-[10px] font-bold  tracking-widest text-indigo-100/60">
-              <span>Taomlar</span>
-              <span>{{ formatPrice(cart.subtotal) }}</span>
-            </div>
-            
-            <div v-if="cart.serviceFeeAmount > 0" class="flex justify-between items-center text-[10px] font-bold  tracking-widest text-indigo-100">
-              <span class="flex items-center gap-1.5">
-                Xizmat  <span class="bg-white/20 px-1 rounded text-[8px]">{{ cart.serviceFeePercent }}%</span>
-              </span>
-              <span>+ {{ formatPrice(cart.serviceFeeAmount) }}</span>
-            </div>
-
-            <div v-if="cart.discountAmount > 0" class="flex justify-between items-center text-[10px] font-bold  tracking-widest text-emerald-300">
-              <span class="flex items-center gap-1.5">
-                Chegirma <span class="bg-emerald-400/20 px-1 rounded text-[8px]">{{ cart.discountPercent }}%</span>
-              </span>
-              <span>- {{ formatPrice(cart.discountAmount) }}</span>
-            </div>
-          </div>
-        <div class="relative z-10 flex justify-between items-end">
+      <div class="relative overflow-hidden bg-slate-900 dark:bg-indigo-600 rounded-[40px] p-8 shadow-2xl group transition-all duration-500">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
         
-          <div class="space-y-1">
-          
-            <p class="text-[10px] font-black text-indigo-100/80 uppercase tracking-[0.2em]">Jami to'lov</p>
-            <h2 class="text-4xl font-black text-white tracking-tighter">
-              {{ formatPrice(grandTotal) }}
-            </h2>
+        <div class="relative z-10 flex flex-col gap-4">
+          <div class="flex justify-between items-start">
+            <div class="space-y-1">
+              <p class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">To'lov summasi</p>
+              <h2 class="text-4xl font-black text-white tracking-tighter">
+                {{ formatPrice(grandTotal) }}
+              </h2>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+              <i class="fa-solid fa-receipt text-xl text-white"></i>
+            </div>
           </div>
-          <i class="fa-solid fa-receipt text-5xl text-white/10 rotate-12"></i>
+
+          <div class="flex gap-4 pt-4 border-t border-white/10 text-[9px] font-black text-white/60 uppercase tracking-widest">
+            <span>Taom: {{ formatPrice(cart.subtotal) }}</span>
+            <span v-if="cart.serviceFeeAmount > 0">Xizmat: +{{ cart.serviceFeePercent }}%</span>
+          </div>
         </div>
       </div>
 
       <div class="space-y-4">
-        <div class="flex p-1.5 bg-slate-200/50 dark:bg-slate-900 rounded-2xl">
+        <div class="flex p-1.5 bg-slate-200/50 dark:bg-slate-900 rounded-[22px]">
           <button 
-            v-for="t in [{id:'single', n:'Tezkor', i:'fa-bolt'}, {id:'mixed', n:'Aralash', i:'fa-layer-group'}]" :key="t.id"
+            v-for="t in [{id:'single', n:'Tezkor', i:'fa-bolt-lightning'}, {id:'mixed', n:'Aralash', i:'fa-layer-group'}]" :key="t.id"
             @click="activeTab = t.id"
-            class="flex-1 flex items-center justify-center gap-2 py-2.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all"
-            :class="activeTab === t.id ? 'bg-white dark:bg-slate-800 shadow-md text-indigo-600' : 'text-slate-400'"
+            class="flex-1 flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest rounded-[18px] transition-all duration-300"
+            :class="activeTab === t.id ? 'bg-white dark:bg-slate-800 shadow-lg text-indigo-600' : 'text-slate-400'"
           >
             <i class="fa-solid" :class="t.i"></i> {{ t.n }}
           </button>
         </div>
 
-        <div v-if="activeTab === 'single'" class="grid grid-cols-5 gap-2 fade-in">
-          <button 
-            v-for="(val, key) in {cash: 'Naqd', card: 'Karta', terminal: 'Term', debt: 'Qarz', balance: 'Balans'}" :key="key"
-            v-show="key !== 'balance' || customerBalance > 0"
-            @click="selectedMethod = key"
-            class="flex flex-col items-center gap-2 py-4 rounded-2xl border transition-all"
-            :class="selectedMethod === key ? 'bg-indigo-50 border-indigo-200 text-indigo-600 ring-2 ring-indigo-500/10' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-400'"
-          >
-            <i class="fa-solid text-sm" :class="{
-              'fa-money-bill-1': key==='cash', 'fa-credit-card': key==='card', 
-              'fa-print': key==='terminal', 'fa-handshake': key==='debt', 'fa-wallet': key==='balance'
-            }"></i>
-            <span class="text-[8px] font-black uppercase">{{ val }}</span>
-          </button>
-        </div>
+       <div v-if="activeTab === 'single'" class="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+  <button 
+    v-for="(val, key) in {cash: 'Naqd Pul', card: 'Plastik Karta', terminal: 'Terminal', debt: 'Nasiya (Qarz)', balance: 'Mijoz Balansi'}" :key="key"
+    v-show="key !== 'balance' || customerBalance > 0"
+    @click="selectedMethod = key"
+    class="flex items-center justify-between px-5 py-4 rounded-[22px] border transition-all duration-300 group"
+    :class="selectedMethod === key 
+      ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
+      : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-white/5 text-slate-500 hover:border-indigo-200'"
+  >
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+           :class="selectedMethod === key ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-indigo-500'">
+        <i class="fa-solid text-lg" :class="{
+          'fa-money-bill-wave': key==='cash', 
+          'fa-credit-card': key==='card', 
+          'fa-cash-register': key==='terminal', 
+          'fa-handshake-angle': key==='debt', 
+          'fa-wallet': key==='balance'
+        }"></i>
+      </div>
+      <div class="flex flex-col items-start">
+        <span class="text-xs font-black uppercase tracking-wider">{{ val }}</span>
+        <span v-if="key === 'balance'" class="text-[9px] opacity-70">{{ formatPrice(customerBalance) }} mavjud</span>
+      </div>
+    </div>
 
-        <div v-if="activeTab === 'mixed'" class="grid grid-cols-2 gap-3 fade-in">
-          <div v-for="f in [
-            {k:'cash', l:'Naqd', i:'fa-wallet', c:'indigo'}, 
-            {k:'card', l:'Karta', i:'fa-credit-card', c:'blue'}, 
-            {k:'terminal', l:'Term', i:'fa-print', c:'slate'}, 
-            {k:'debt', l:'Nasiya', i:'fa-clock', c:'rose'},
-            {k:'balance', l:'Balans', i:'fa-vault', c:'amber'}
-          ]" :key="f.k" 
-            v-show="f.k !== 'balance' || customerBalance > 0"
-            class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-          >
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-[9px] font-black uppercase text-slate-400">{{ f.l }}</label>
-              <span v-if="f.k === 'balance'" class="text-[8px] font-bold text-amber-500">{{ formatPrice(customerBalance) }}</span>
-            </div>
-            <Input 
-              v-model="model_payment[f.k]" 
-              type="number" 
-              @focus="$event.target.select()"
-              clearable
-            />
-          </div>
+    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+         :class="selectedMethod === key ? 'border-white bg-white text-indigo-600' : 'border-slate-200 dark:border-slate-700'">
+      <i v-if="selectedMethod === key" class="fa-solid fa-check text-[10px]"></i>
+    </div>
+  </button>
+</div>
+
+      <div v-if="activeTab === 'mixed'" class="flex flex-col gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+  <div v-for="f in [
+    {k:'cash', l:'Naqd Pul', i:'fa-money-bill-1', desc: 'Kassaga naqd qabul qilish'}, 
+    {k:'card', l:'Plastik Karta', i:'fa-credit-card', desc: 'Humo / UzCard orqali'}, 
+    {k:'terminal', l:'Terminal', i:'fa-print', desc: 'Bank terminali orqali'}, 
+    {k:'debt', l:'Nasiya (Qarz)', i:'fa-clock', desc: 'Mijoz hisobiga qarz yozish'},
+    {k:'balance', l:'Mijoz Balansi', i:'fa-vault', desc: 'Mijozning ichki hamyonidan'}
+  ]" :key="f.k" 
+    v-show="f.k !== 'balance' || customerBalance > 0"
+    @click="openKeyboard(f.k)"
+    class="relative overflow-hidden p-4 rounded-[26px] bg-white dark:bg-slate-900 border transition-all duration-300 cursor-pointer group"
+    :class="activeField === f.k 
+      ? 'border-indigo-500 ring-4 ring-indigo-500/10 shadow-lg' 
+      : 'border-slate-100 dark:border-white/5 hover:border-indigo-200'"
+  >
+    <div v-if="activeField === f.k" class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300"
+             :class="activeField === f.k ? 'bg-indigo-500 text-white shadow-indigo-200 shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500'">
+          <i class="fa-solid text-lg" :class="f.i"></i>
         </div>
+        <div class="flex flex-col">
+          <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider transition-colors"
+                 :class="{'text-indigo-600': activeField === f.k}">
+            {{ f.l }}
+          </label>
+          <span class="text-[9px] text-slate-400 font-medium tracking-tight">
+            {{ f.k === 'balance' ? `Mavjud: ${formatPrice(customerBalance)}` : f.desc }}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-end">
+        <div class="text-lg font-black tracking-tighter transition-all"
+             :class="[
+               model_payment[f.k] > 0 ? 'text-slate-900 dark:text-white scale-110' : 'text-slate-300',
+               {'text-indigo-600': activeField === f.k}
+             ]">
+          {{ model_payment[f.k] ? formatPrice(model_payment[f.k]) : '0.00' }}
+        </div>
+        <div v-if="activeField === f.k" class="flex gap-1 mt-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-300 animate-bounce [animation-delay:0.4s]"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
 
     <template #footer>
-      <div class="flex items-center justify-between w-full px-2">
+      <div class="flex items-center justify-between w-full px-2 py-2">
         <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500"
-               :class="remaining <= 0 ? 'bg-emerald-500 border-emerald-500 text-white rotate-[360deg]' : 'bg-white dark:bg-slate-900 border-slate-200 text-slate-300'">
-            <i class="fa-solid" :class="remaining <= 0 ? 'fa-check' : 'fa-receipt'"></i>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-700"
+               :class="remaining <= 0 ? 'bg-emerald-500 border-emerald-500 text-white rotate-[360deg]' : 'bg-white dark:bg-slate-900 border-slate-100 text-slate-300'">
+            <i class="fa-solid" :class="remaining <= 0 ? 'fa-check text-lg' : 'fa-spinner fa-spin text-sm'"></i>
           </div>
 
           <div class="flex flex-col">
-            <span class="text-[9px] font-black uppercase tracking-widest" :class="surplus > 0 ? 'text-emerald-500' : 'text-slate-400'">
-              {{ surplus > 0 ? "Mijoz balansiga (Qaytim)" : "Qoldiq" }}
+            <span class="text-[10px] font-black  tracking-[0.1em]" :class="surplus > 0 ? 'text-emerald-500' : 'text-slate-400'">
+              {{ surplus > 0 ? "Balansga o'tadi" : "To'lov qoldig'i" }}
             </span>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-black tracking-tighter" :class="surplus > 0 ? 'text-emerald-600' : 'text-slate-900 dark:text-white'">
-                {{ surplus > 0 ? `+ ${formatPrice(surplus)}` : formatPrice(remaining) }}
-              </span>
-              <div v-if="remaining > 0" class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
-            </div>
+            <span class="text-sm font-black tracking-tighter" :class="surplus > 0 ? 'text-emerald-600' : 'text-slate-900 dark:text-white'">
+              {{ surplus > 0 ? `+ ${formatPrice(surplus)}` : formatPrice(remaining) }}
+            </span>
           </div>
         </div>
 
         <Button 
           @click="onFinish"
+          size="small"
           :variant="isReady ? 'primary' : 'disabled'"
-          leftIcon="fas fa-check"
-          size="sm"
-          :class="isReady ? 'shadow-indigo-200 scale-105' : 'opacity-30'"
+          :class="isReady ? 'shadow-2xl shadow-indigo-500/40 scale-105 active:scale-95' : 'opacity-30'"
         >
-          <span class="font-black uppercase tracking-widest text-xs">
-            {{ isReady ? 'Yakunlash' : 'To\'ldiring' }}
-          </span>
+          <div class="flex items-center gap-3">
+            <span class="font-black uppercase tracking-widest text-xs">
+              {{ isReady ? `To'lov` : 'Kutilmoqda' }}
+            </span>
+            <i v-if="isReady" class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
+          </div>
         </Button>
       </div>
     </template>
+
+    <Keyboard 
+      v-model="keyboardValue" 
+      :show="keyboardShow" 
+      @close="keyboardShow = false; activeField = null" 
+    />
   </Modal>
 </template>
 
 <style scoped>
-.fade-in { animation: fadeIn 0.3s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* Qo'shimcha chiroyli animatsiyalar uchun */
+.animate-in {
+  animation-delay: 0.1s;
+}
 </style>

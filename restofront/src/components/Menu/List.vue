@@ -12,49 +12,64 @@
       
       <div class="max-w-full mx-auto px-4 mb-40 mt-3">
         <div v-if="!store_menu.loading && filteredFoods.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div 
-            v-for="food in filteredFoods" 
-            :key="food._id" 
-            :class="['group bg-white dark:bg-slate-900 rounded-[30px] p-3 border transition-all duration-500 flex gap-4 items-center relative overflow-hidden', 
-            getItemCount(food._id) > 0 ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500/10' : 'border-slate-100 dark:border-white/5 shadow-sm']"
-          >
-            <div class="relative w-24 h-24 flex-none overflow-hidden rounded-[22px] bg-slate-100 dark:bg-slate-800">
-              <img :src="food.image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <button 
-                v-if="getItemCount(food._id) > 0" 
-                @click="store_menu.updateCartQty({ id: food._id, change: -getItemCount(food._id) })" 
-                class="absolute inset-0 bg-red-500/80 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <ion-icon :icon="trashOutline" class="text-2xl" />
-              </button>
-            </div>
+         <div 
+  v-for="food in filteredFoods" 
+  :key="food._id" 
+  :class="['group bg-white dark:bg-slate-900 rounded-[30px] p-3 border transition-all duration-500 flex gap-4 items-center relative overflow-hidden', 
+  getItemCount(food._id) > 0 ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500/10' : 'border-slate-100 dark:border-white/5 shadow-sm']"
+>
+  <div class="relative w-24 h-24 flex-none overflow-hidden rounded-[22px] bg-slate-100 dark:bg-slate-800">
+    <img v-if="food.image" :src="food.image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+    <div v-else class="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
+      <ion-icon :icon="restaurantOutline" class="text-3xl" />
+    </div>
+    <button v-if="getItemCount(food._id) > 0" @click.stop="store_menu.updateCartQty({ id: food._id, change: -getItemCount(food._id) })" 
+      class="absolute inset-0 bg-red-500/80 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+      <ion-icon :icon="trashOutline" class="text-2xl" />
+    </button>
+  </div>
 
-            <div class="flex-1 min-w-0">
-              <h3 class="text-[15px] font-black text-slate-800 dark:text-white truncate uppercase">{{ food.name }}</h3>
-              <p class="text-[11px] text-slate-400 line-clamp-1 mb-2">{{ food.description || 'Mazali taom' }}</p>
+  <div class="flex-1 min-w-0">
+    <div class="flex justify-between items-start mb-0.5">
+      <h3 class="text-[15px] font-black text-slate-800 dark:text-white truncate uppercase">{{ food.name }}</h3>
+      <span v-if="food.unit" class="flex-none text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/5 ml-2">
+        {{ food.unit }}
+      </span>
+    </div>
 
-              <div class="flex items-center justify-between">
-                <span class="text-[14px] font-black text-indigo-600 dark:text-indigo-400">
-                  {{ food.price.toLocaleString() }} <small class="text-[9px]">UZS</small>
-                </span>
+    <p class="text-[11px] text-slate-400 line-clamp-1 mb-2">{{ food.description || 'Mazali taom' }}</p>
 
-                <div class="flex items-center">
-                  <div v-if="getItemCount(food._id) > 0" class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-[14px] p-1 gap-1 border border-slate-200 dark:border-white/5">
-                    <button @click="handleUpdateQty(food._id, -1)" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 text-slate-600 dark:text-white flex items-center justify-center active:scale-75 shadow-sm">
-                      <ion-icon :icon="removeOutline" />
-                    </button>
-                    <span class="text-xs font-black min-w-[24px] text-center dark:text-white">{{ getItemCount(food._id) }}</span>
-                    <button @click="handleUpdateQty(food._id, 1)" class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center active:scale-75 shadow-sm">
-                      <ion-icon :icon="addOutline" />
-                    </button>
-                  </div>
-                  <button v-else @click="handleAddToCart(food)" class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center active:scale-90 shadow-lg">
-                    <ion-icon :icon="addOutline" class="text-xl" />
-                  </button>
-                </div>
-              </div>
-            </div>
+    <div class="flex items-center justify-between">
+      <div class="flex flex-col">
+        <span class="text-[14px] font-black text-indigo-600 dark:text-indigo-400 leading-none">
+          {{ food.price.toLocaleString() }} <small class="text-[9px]">UZS</small>
+        </span>
+       
+      </div>
+
+      <div class="flex items-center">
+        <div v-if="getItemCount(food._id) > 0" class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-[14px] p-1 gap-1 border border-slate-200 dark:border-white/5">
+          <button @click="handleUpdateQty(food._id, -1)" class="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 text-slate-600 dark:text-white flex items-center justify-center active:scale-75 shadow-sm">
+            <ion-icon :icon="removeOutline" />
+          </button>
+          
+          <div class="flex flex-col items-center min-w-[32px]">
+            <span class="text-xs font-black dark:text-white leading-none">{{ getItemCount(food._id) }}</span>
+            <span class="text-[8px] text-slate-400 uppercase font-medium">{{ food.unit || 'pcs' }}</span>
           </div>
+
+          <button @click="handleUpdateQty(food._id, 1)" class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center active:scale-75 shadow-sm">
+            <ion-icon :icon="addOutline" />
+          </button>
+        </div>
+
+        <button v-else @click="handleAddToCart(food)" class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center active:scale-90 shadow-lg">
+          <ion-icon :icon="addOutline" class="text-xl" />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
 
         <div v-else-if="store_menu.loading">
@@ -110,7 +125,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { IonPage, IonContent, IonIcon } from "@ionic/vue";
-import { addOutline, removeOutline, trashOutline } from "ionicons/icons";
+import { addOutline, removeOutline, restaurantOutline, trashOutline } from "ionicons/icons";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { MenuStore } from "../../stores/index.store";
 import { storeToRefs } from "pinia";

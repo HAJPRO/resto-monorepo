@@ -1,25 +1,30 @@
 const BaseError = require("../../errors/base.error");
 
 class MenuService {
-  async Create(req) {
+async Create(req) {
     const { Menu } = req.tenantModels;
     
-    // Agar body bo'sh bo'lsa, demak JSON limit yoki Header muammosi bor
     if (!req.body || Object.keys(req.body).length === 0) {
         throw new BaseError("Ma'lumotlar qabul qilinmadi (JSON body bo'sh)", 400);
     }
 
-    const { action, _id, image } = req.body;
+    const { action, _id } = req.body;
     console.log("Kelingan Action:", action); 
 
     if (action === 'create') {
-        if (!image) throw new BaseError("Rasm majburiy", 400);
+        // "if (!image) ..." sharti olib tashlandi, rasm kelsa ham, kelmasa ham saqlayveradi
         const data = await Menu.create(req.body);   
         return { msg: "Muvaffaqiyatli yaratildi", data };
 
     } else if (action === 'edit') {
         if (!_id) throw new BaseError("ID topilmadi", 400);
-        const updated = await Menu.findByIdAndUpdate(_id, req.body, { new: true });
+        
+        // Yangilashda action va _id maydonlarini req.body ichidan o'chirib tashlash tavsiya etiladi (DB toza bo'lishi uchun)
+        const updateData = { ...req.body };
+        delete updateData.action;
+        delete updateData._id;
+
+        const updated = await Menu.findByIdAndUpdate(_id, updateData, { new: true });
         return { msg: "Muvaffaqiyatli yangilandi", data: updated };
     }
 

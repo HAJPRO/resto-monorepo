@@ -18,6 +18,7 @@ export { default as Table } from './Table.vue';
 export { default as Toast } from './Toast.vue';
 export { default as Upload } from './Upload.vue';
 export { default as DateRangePicker } from './DateRangePicker.vue';
+export { default as Keyboard } from './Keyboard.vue';
 export { default as GlobalRefresher } from './GlobalRefresher.vue';
 export { default as LoadingState } from './LoadingState.vue';
 export { default as Header } from './Header.vue';

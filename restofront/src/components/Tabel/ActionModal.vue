@@ -102,6 +102,7 @@ onMounted(async ()=>{
             type="number" 
             placeholder="Masalan: 4" 
             class="!rounded-2xl border-slate-200 shadow-sm"
+            isFormatted
           />
         </div>
       </div>

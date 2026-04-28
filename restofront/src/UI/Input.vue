@@ -15,14 +15,15 @@ const props = defineProps({
   label: { type: String, default: '' },
   placeholder: { type: String, default: '' },
   help: { type: String, default: '' },
-  error: { type: [String, Boolean], default: false }, // Tashqaridan keladigan xato
-  rules: { type: Array, default: () => [] },        // Validatsiya qoidalari: [v => !!v || 'Xato matni']
+  error: { type: [String, Boolean], default: false },
+  rules: { type: Array, default: () => [] },
   success: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
   required: { type: Boolean, default: false },
   clearable: { type: Boolean, default: false },
+  isFormatted: { type: Boolean, default: false }, // Yangi: Sonlarni formatlash uchun
   iconPre: { type: String, default: '' },
   iconPost: { type: String, default: '' },
   rows: { type: [String, Number], default: 3 },
@@ -39,15 +40,34 @@ const isFocused = ref(false);
 const showPassword = ref(false);
 const fileName = ref('');
 
+// --- FORMATTING LOGIC ---
+const formatNumber = (val) => {
+  if (val === '' || val === null || val === undefined) return '';
+  const parts = val.toString().split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return parts.join('.');
+};
+
+const unformatNumber = (val) => {
+  if (typeof val === 'number') return val;
+  return val.toString().replace(/\s/g, '').replace(/,/g, '.');
+};
+
+const displayValue = computed(() => {
+  if (props.isFormatted && props.type === 'number') {
+    return formatNumber(props.modelValue);
+  }
+  return props.modelValue;
+});
+
 // --- VALIDATION LOGIC ---
 const internalError = ref(false);
-
 const runValidation = (value) => {
   if (props.rules && props.rules.length > 0) {
     for (const rule of props.rules) {
       const result = rule(value);
       if (result !== true) {
-        internalError.value = result; // Xatolik matnini saqlash
+        internalError.value = result;
         return false;
       }
     }
@@ -56,17 +76,11 @@ const runValidation = (value) => {
   return true;
 };
 
-// Tashqaridan chaqirish uchun (masalan: inputRef.value.validate())
 const validate = () => runValidation(props.modelValue);
-
-// Xatolikni tozalash
-const resetValidation = () => {
-  internalError.value = false;
-};
-
+const resetValidation = () => { internalError.value = false; };
 defineExpose({ validate, resetValidation });
 
-// --- SIZE CONFIGURATION ---
+// --- CONFIGURATIONS ---
 const sizeConfig = computed(() => {
   const configs = {
     small: { h: 'min-h-[38px]', font: 'text-[12px]', icon: 'text-sm', rounded: 'rounded-xl' },
@@ -81,7 +95,11 @@ const hasContent = computed(() => {
   return props.modelValue !== '' && props.modelValue !== null && props.modelValue !== undefined;
 });
 
-const inputType = computed(() => (props.type === 'password' && showPassword.value) ? 'text' : props.type);
+const inputType = computed(() => {
+  if (props.type === 'password' && showPassword.value) return 'text';
+  if (props.isFormatted && props.type === 'number') return 'text'; // Formatlash uchun text rejim kerak
+  return props.type;
+});
 
 const getAutoIcon = () => {
   const icons = { 
@@ -108,10 +126,9 @@ const wrapperClasses = computed(() => [
 const labelClasses = computed(() => {
   const hasPrefix = !!slots.prefix || !!props.iconPre || !!getAutoIcon();
   const leftPadding = hasPrefix ? (props.size === 'small' ? 'left-9' : 'left-10') : 'left-4';
-
   return [
     'absolute font-bold transition-all duration-200 select-none z-10 pointer-events-none tracking-wide uppercase text-[10px]',
-    'bg-white dark:bg-slate-800 px-1.5 rounded',
+    'bg-white dark:bg-slate-950 px-1.5 rounded',
     (isFocused.value || hasContent.value || props.type === 'date')
       ? `-top-2.5 ${leftPadding} text-indigo-600 dark:text-indigo-400`
       : `top-1/2 -translate-y-1/2 ${leftPadding} text-slate-400`,
@@ -121,15 +138,23 @@ const labelClasses = computed(() => {
 
 // --- HANDLERS ---
 const handleInput = (e) => {
-  const value = e.target.value;
-  emit('update:modelValue', value);
-  // Agar xato bo'lsa, yozayotganda qayta tekshirib xatoni yo'qotadi
-  if (internalError.value) runValidation(value);
+  let value = e.target.value;
+  if (props.isFormatted && props.type === 'number') {
+    const cleanValue = value.replace(/[^0-9.,]/g, '');
+    const numericValue = unformatNumber(cleanValue);
+    const finalValue = numericValue === '' ? '' : Number(numericValue);
+    emit('update:modelValue', finalValue);
+    e.target.value = formatNumber(numericValue); // Vizual formatlash
+    if (internalError.value) runValidation(finalValue);
+  } else {
+    emit('update:modelValue', value);
+    if (internalError.value) runValidation(value);
+  }
 };
 
 const handleBlur = (e) => {
   isFocused.value = false;
-  runValidation(props.modelValue); // Chiqib ketganda tekshirish
+  runValidation(props.modelValue);
   emit('blur', e);
 };
 
@@ -156,7 +181,6 @@ const clear = () => {
 
 <template>
   <div class="flex flex-col w-full group/input">
-    
     <div :class="wrapperClasses" @click="type === 'file' ? triggerFile() : null">
       
       <label v-if="label" :class="labelClasses">
@@ -178,7 +202,6 @@ const clear = () => {
       </div>
 
       <div class="relative flex-1 flex items-center min-w-0">
-        
         <div v-if="type === 'file'" class="w-full flex items-center justify-between gap-2 px-4 select-none">
           <span :class="[sizeConfig.font, fileName ? 'text-slate-700 dark:text-slate-200 font-bold' : 'text-slate-400 italic']" class="truncate">
             {{ fileName || placeholder || 'Faylni tanlang...' }}
@@ -194,7 +217,7 @@ const clear = () => {
           ref="inputRef"
           :id="id"
           :type="inputType"
-          :value="modelValue"
+          :value="displayValue"
           :placeholder="isFocused ? placeholder : ''"
           :disabled="disabled || loading"
           :readonly="readonly"
@@ -236,7 +259,7 @@ const clear = () => {
           <i :class="[showPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye', sizeConfig.icon]"></i>
         </button>
 
-        <span v-if="suffix" class="text-[10px] font-black text-slate-400 uppercase select-none">{{ suffix }}</span>
+        <span v-if="suffix" class="text-[10px] font-black text-slate-400 uppercase select-none tracking-widest">{{ suffix }}</span>
 
         <i v-if="(error || internalError) && !loading" class="fa-solid fa-circle-exclamation text-rose-500 animate-pulse" :class="sizeConfig.icon"></i>
         <i v-if="success && !loading" class="fa-solid fa-circle-check text-emerald-500" :class="sizeConfig.icon"></i>
@@ -256,20 +279,13 @@ const clear = () => {
         </p>
       </transition>
     </div>
-
   </div>
 </template>
 
 <style scoped>
-input, textarea, button {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input, textarea, button { outline: none !important; box-shadow: none !important; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
-
 input::placeholder { font-weight: 500; font-style: italic; opacity: 0.6; }
 
 .msg-enter-active, .msg-leave-active { transition: all 0.3s ease; }
@@ -278,9 +294,7 @@ input::placeholder { font-weight: 500; font-style: italic; opacity: 0.6; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: scale(0.8); }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus {
+input:-webkit-autofill {
   -webkit-text-fill-color: inherit;
   -webkit-box-shadow: 0 0 0px 1000px transparent inset;
   transition: background-color 5000s ease-in-out 0s;

@@ -7,9 +7,15 @@ const MenuSchema = new Schema(
       required: true,
       trim: true,
     },
+    unit: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "1 porsiya", // Masalan: "100gr", "1 dona"
+    },
     image: {
       type: String, // Rasm yo'li (URL yoki path)
-      required: true,
+      default: "default.jpg", // Agar rasm ko'rsatilmasa, default rasm
     },
     price: {
       type: Number, // Narxlar bilan ishlashda Number yaxshiroq
