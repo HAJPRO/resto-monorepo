@@ -15,31 +15,77 @@
 10 silly isBehindUpstream
 11 silly isBehindUpstream main is behind origin/main by 0 commit(s) and ahead by 0
 12 silly hasTags
-13 verbose hasTags false
-14 info Assuming all packages changed
-15 verbose updated restoback
-16 verbose updated restofront
-17 verbose git-describe undefined => "3382517"
-18 silly git-describe parsed => {"refCount":"6","sha":"3382517","isDirty":false}
-19 info execute Skipping releases
-20 silly lifecycle No script for "preversion" in "resto-monorepo", continuing
-21 silly lifecycle No script for "preversion" in "restoback", continuing
-22 silly lifecycle No script for "preversion" in "restofront", continuing
-23 silly lifecycle No script for "version" in "restoback", continuing
-24 silly lifecycle No script for "version" in "restofront", continuing
-25 silly lifecycle No script for "version" in "resto-monorepo", continuing
-26 verbose version Updating root package-lock.json
-27 silly gitAdd [
-27 silly gitAdd   'restoback/package.json',
-27 silly gitAdd   'restoback/package-lock.json',
-27 silly gitAdd   'restofront/package.json',
-27 silly gitAdd   'restofront/package-lock.json',
-27 silly gitAdd   'package-lock.json'
-27 silly gitAdd ]
-28 error Error: Command failed with exit code 128: git add -- restoback/package.json restoback/package-lock.json restofront/package.json restofront/package-lock.json package-lock.json
-28 error fatal: Pathspec 'restofront/package.json' is in submodule 'restofront'
-28 error     at makeError (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\lib\error.js:59:11)
-28 error     at handlePromise (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\index.js:114:26)
-28 error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-28 error     at async VersionCommand.updatePackageVersions (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9821:11)
-28 error     at async Promise.all (index 0)
+13 verbose hasTags true
+14 silly git-describe.sync "restoback@1.0.5-5-gca90daa" => {"lastTagName":"restoback@1.0.5","lastVersion":"1.0.5","refCount":"5","sha":"ca90daa","isDirty":false}
+15 info Looking for changed packages since restoback@1.0.5
+16 silly checking diff restoback
+17 silly found diff in restoback/models/Menu/menu.model.js
+17 silly found diff in restoback/services/Dashboard/Sale/statistics.service.js
+17 silly found diff in restoback/services/Menu/menu.service.js
+18 verbose filtered diff [
+18 verbose filtered diff   'restoback/models/Menu/menu.model.js',
+18 verbose filtered diff   'restoback/services/Dashboard/Sale/statistics.service.js',
+18 verbose filtered diff   'restoback/services/Menu/menu.service.js'
+18 verbose filtered diff ]
+19 silly checking diff restofront
+20 silly found diff in restofront/android/capacitor.settings.gradle
+20 silly found diff in restofront/src/UI/Input.vue
+20 silly found diff in restofront/src/UI/Keyboard.vue
+20 silly found diff in restofront/src/UI/UI.js
+20 silly found diff in restofront/src/components/Menu/ActionModal.vue
+20 silly found diff in restofront/src/components/Menu/List.vue
+20 silly found diff in restofront/src/components/Tabel/ActionModal.vue
+20 silly found diff in restofront/src/components/Tabel/PaymentModal.vue
+20 silly found diff in restofront/src/stores/Dashboard/Sale/statistics.store.js
+21 verbose filtered diff [
+21 verbose filtered diff   'restofront/android/capacitor.settings.gradle',
+21 verbose filtered diff   'restofront/src/UI/Input.vue',
+21 verbose filtered diff   'restofront/src/UI/Keyboard.vue',
+21 verbose filtered diff   'restofront/src/UI/UI.js',
+21 verbose filtered diff   'restofront/src/components/Menu/ActionModal.vue',
+21 verbose filtered diff   'restofront/src/components/Menu/List.vue',
+21 verbose filtered diff   'restofront/src/components/Tabel/ActionModal.vue',
+21 verbose filtered diff   'restofront/src/components/Tabel/PaymentModal.vue',
+21 verbose filtered diff   'restofront/src/stores/Dashboard/Sale/statistics.store.js'
+21 verbose filtered diff ]
+22 verbose updated restoback
+23 verbose updated restofront
+24 verbose git-describe undefined => "restoback@1.0.5-5-gca90daa"
+25 silly git-describe parsed => {"lastTagName":"restoback@1.0.5","lastVersion":"1.0.5","refCount":"5","sha":"ca90daa","isDirty":false}
+26 info execute Skipping releases
+27 silly lifecycle No script for "preversion" in "resto-monorepo", continuing
+28 silly lifecycle No script for "preversion" in "restoback", continuing
+29 silly lifecycle No script for "preversion" in "restofront", continuing
+30 silly lifecycle No script for "version" in "restoback", continuing
+31 silly lifecycle No script for "version" in "restofront", continuing
+32 silly lifecycle No script for "version" in "resto-monorepo", continuing
+33 verbose version Updating root package-lock.json
+34 silly gitAdd [
+34 silly gitAdd   'restoback/package.json',
+34 silly gitAdd   'restoback/package-lock.json',
+34 silly gitAdd   'restofront/package.json',
+34 silly gitAdd   'restofront/package-lock.json',
+34 silly gitAdd   'package-lock.json'
+34 silly gitAdd ]
+35 silly gitCommit Publish
+35 silly gitCommit
+35 silly gitCommit  - restoback@1.0.5
+35 silly gitCommit  - restofront@1.0.7-alpha.0
+36 verbose git [
+36 verbose git   'commit',
+36 verbose git   '-F',
+36 verbose git   'C:\\Users\\Dell\\AppData\\Local\\Temp\\ec38fcaf-b22d-4962-94d1-64150654bf0b\\lerna-commit.txt'
+36 verbose git ]
+37 silly gitTag restoback@1.0.5 git tag %s -m %s
+38 verbose git [ 'tag', 'restoback@1.0.5', '-m', 'restoback@1.0.5' ]
+39 silly gitTag restofront@1.0.7-alpha.0 git tag %s -m %s
+40 verbose git [ 'tag', 'restofront@1.0.7-alpha.0', '-m', 'restofront@1.0.7-alpha.0' ]
+41 error Error: Command failed with exit code 128: git tag restoback@1.0.5 -m restoback@1.0.5
+41 error fatal: tag 'restoback@1.0.5' already exists
+41 error     at makeError (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\lib\error.js:59:11)
+41 error     at handlePromise (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\index.js:114:26)
+41 error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+41 error     at async Promise.all (index 0)
+41 error     at async VersionCommand.gitCommitAndTagVersionForUpdates (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9865:11)
+41 error     at async VersionCommand.commitAndTagUpdates (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9841:18)
+41 error     at async Promise.all (index 0)

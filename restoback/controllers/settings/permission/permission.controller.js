@@ -22,6 +22,14 @@ class PermissionController {
       next(error);
     }
   }
+  async DeletePermission(req, res, next) {
+    try {
+      const data = await PermissionService.DeletePermission(req);
+      res.status(data.status).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PermissionController();

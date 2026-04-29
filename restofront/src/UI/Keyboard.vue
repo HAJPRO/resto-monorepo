@@ -1,74 +1,62 @@
 <template>
-  <Transition name="slide-up">
-    <div v-if="show" class="fixed inset-x-0 bottom-0 z-[999] bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl border-t border-slate-200/60 dark:border-white/10 pb-10 pt-2 px-6 shadow-[0_-25px_60px_rgba(0,0,0,0.15)] rounded-t-[45px]">
+  <Transition name="kb-smooth">
+    <div v-if="show" class="fixed inset-0 z-[999] flex items-end justify-center overflow-hidden">
       
-      <div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto my-4 mb-6"></div>
+      <div class="absolute inset-0 bg-[#05070a]/90 backdrop-blur-md" @click="$emit('close')"></div>
 
-      <div class="max-w-md mx-auto">
-        <div class="relative group mb-6">
-          <div class="bg-slate-50 dark:bg-slate-800/40 rounded-[28px] p-5 border border-slate-100 dark:border-white/5 transition-all duration-300 group-focus-within:border-indigo-500">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kiritish maydoni</span>
-              
-              <button 
-                v-if="modelValue && modelValue !== '0'"
-                @click="onClearAll"
-                class="w-6 h-6 rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center hover:scale-110 active:scale-90 transition-all"
-              >
-                <ion-icon :icon="closeOutline" class="text-lg" />
-              </button>
-            </div>
+      <div class="relative w-full sm:max-w-md bg-[#0d111b] rounded-t-[50px] shadow-[0_-20px_80px_rgba(0,0,0,0.6)] flex flex-col max-h-[90vh] border-t border-white/5 antialiased">
+        
+        <div class="flex flex-col items-center pt-4 shrink-0">
+          <div class="w-12 h-1 bg-slate-800 rounded-full mb-4"></div>
+        </div>
 
-            <div class="flex items-baseline justify-end mt-2 overflow-hidden">
-              <span class="text-4xl font-black text-slate-900 dark:text-white transition-all tracking-tight">
-                {{ formatNumber(modelValue) || '0' }}
-              </span>
-              <div class="w-1 h-8 bg-indigo-500 ml-2 rounded-full animate-pulse"></div>
+        <div class="px-8 pb-12 overflow-y-auto no-scrollbar">
+          
+          <div class="mb-10 text-right pr-2">
+            <div class="flex items-center justify-end gap-3">
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500/60 mb-1">Total Amount</span>
+                <h1 class="font-bold tracking-tighter text-white transition-all duration-300"
+                    :class="modelValue.toString().length > 9 ? 'text-4xl' : 'text-6xl'">
+                  {{ formatNumber(modelValue) || '0' }}
+                </h1>
+              </div>
+              <div class="w-1 h-12 bg-indigo-500 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.5)] animate-pulse"></div>
             </div>
           </div>
-        </div>
 
-        <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
-          <button 
-            v-for="amount in ['+1000', '+5000', '+10000', '+50000']" 
-            :key="amount"
-            @click="onQuickAdd(amount)"
-            class="whitespace-nowrap px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-100/50 dark:border-indigo-500/20 active:scale-95 transition-all"
-          >
-            {{ amount }}
+          <div class="grid grid-cols-3 gap-y-8 gap-x-6 mb-10">
+            <button v-for="n in ['1','2','3','4','5','6','7','8','9']" :key="n" 
+              @click="onKeyClick(n)" class="kb-key-minimal">
+              {{ n }}
+            </button>
+
+            <button @click="onKeyClick('.')" class="h-16 flex items-center justify-center group">
+              <div class="w-2 h-2 rounded-full bg-slate-800 group-active:bg-indigo-500 transition-colors"></div>
+            </button>
+            
+            <button @click="onKeyClick('0')" class="kb-key-minimal">0</button>
+
+            <button @click="onDelete" class="h-16 flex items-center justify-center text-slate-600 active:text-rose-500 transition-colors">
+              <i class="fa-solid fa-delete-left text-2xl"></i>
+            </button>
+          </div>
+
+          <div class="flex justify-between gap-3 mb-8">
+             <button v-for="amt in ['+10k', '+50k', '+100k', '+500k']" :key="amt" @click="onQuickAdd(amt)"
+               class="flex-1 py-3 rounded-2xl bg-white/[0.02] border border-white/[0.04] text-[10px] font-bold text-slate-500 active:bg-indigo-600 active:text-white transition-all uppercase tracking-tighter">
+               {{ amt }}
+             </button>
+          </div>
+
+          <button @click="$emit('close')" 
+            :disabled="modelValue == '0' || modelValue == ''"
+            class="w-full h-16 rounded-3xl flex items-center justify-center gap-3 transition-all duration-500"
+            :class="(modelValue != '0' && modelValue != '') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 text-slate-600 opacity-40'">
+            <span class="font-black uppercase tracking-[0.2em] text-xs">Tayyor</span>
+            <i class="fa-solid fa-chevron-right text-xs transition-transform group-active:translate-x-1"></i>
           </button>
-        </div>
 
-        <div class="grid grid-cols-3 gap-4">
-          <button 
-            v-for="num in ['1', '2', '3', '4', '5', '6', '7', '8', '9']" 
-            :key="num"
-            @click="onKeyClick(num)"
-            class="h-[72px] rounded-[24px] bg-white dark:bg-slate-800/50 text-slate-800 dark:text-white text-2xl font-bold shadow-sm border border-slate-100 dark:border-white/5 active:scale-90 active:bg-slate-50 dark:active:bg-slate-800 transition-all"
-          >
-            {{ num }}
-          </button>
-
-          <button @click="onKeyClick('.')" class="h-[72px] rounded-[24px] text-slate-500 dark:text-slate-400 text-2xl font-bold flex items-center justify-center">.</button>
-          
-          <button @click="onKeyClick('0')" class="h-[72px] rounded-[24px] bg-white dark:bg-slate-800/50 text-slate-800 dark:text-white text-2xl font-bold border border-slate-100 dark:border-white/5 active:scale-90 transition-all">0</button>
-
-          <button 
-            @click="onDelete"
-            class="h-[72px] rounded-[24px] bg-slate-50 dark:bg-slate-800/80 text-slate-400 flex items-center justify-center active:scale-90 transition-all"
-          >
-            <ion-icon :icon="backspaceOutline" class="text-2xl" />
-          </button>
-
-          <button 
-            @click="$emit('close')"
-            class="col-span-3 h-16 rounded-[24px] bg-slate-900 dark:bg-indigo-600 text-white text-base font-black shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter"
-          >
-            Tayyor 
-            <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-              <ion-icon :icon="chevronForwardOutline" />
-            </div>
-          </button>
         </div>
       </div>
     </div>
@@ -76,44 +64,36 @@
 </template>
 
 <script setup>
-import { backspaceOutline, closeOutline, chevronForwardOutline } from 'ionicons/icons';
-
 const props = defineProps({
   show: Boolean,
-  modelValue: [String, Number]
+  modelValue: { type: [String, Number], default: '0' }
 });
-
 const emit = defineEmits(['update:modelValue', 'close']);
 
-// Raqamlarni chiroyli formatlash (1000 -> 1 000)
 const formatNumber = (val) => {
-  if (!val) return '0';
-  return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  if (!val || val === '0') return '0';
+  let parts = val.toString().split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return parts.join('.');
 };
 
 const onKeyClick = (key) => {
-  let current = props.modelValue?.toString() || '';
+  let current = props.modelValue?.toString() || '0';
   if (key === '.' && current.includes('.')) return;
-  if (current === '0' && key !== '.') {
-    emit('update:modelValue', key);
-  } else {
-    emit('update:modelValue', current + key);
-  }
+  if (current.length > 12) return; 
+  if (current === '0' && key !== '.') emit('update:modelValue', key);
+  else emit('update:modelValue', current + key);
 };
 
-const onQuickAdd = (amount) => {
-  const valueToAdd = parseInt(amount.replace('+', ''));
-  const current = parseInt(props.modelValue) || 0;
-  emit('update:modelValue', (current + valueToAdd).toString());
-};
-
-const onClearAll = () => {
-  emit('update:modelValue', '');
+const onQuickAdd = (amt) => {
+  const val = parseInt(amt.replace(/\D/g, '')) * 1000;
+  const current = parseFloat(props.modelValue.toString().replace(/\s/g, '')) || 0;
+  emit('update:modelValue', (current + val).toString());
 };
 
 const onDelete = () => {
-  let current = props.modelValue?.toString() || '';
-  emit('update:modelValue', current.slice(0, -1));
+  let s = props.modelValue.toString();
+  emit('update:modelValue', s.length > 1 ? s.slice(0, -1) : '0');
 };
 </script>
 
@@ -121,10 +101,16 @@ const onDelete = () => {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-.slide-up-enter-active, .slide-up-leave-active {
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+.kb-key-minimal {
+  @apply h-16 flex items-center justify-center text-4xl font-medium text-white 
+         transition-all duration-100 select-none active:scale-75 active:text-indigo-500;
 }
-.slide-up-enter-from, .slide-up-leave-to {
-  transform: translateY(110%);
+
+.kb-smooth-enter-active, .kb-smooth-leave-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kb-smooth-enter-from, .kb-smooth-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>

@@ -20,5 +20,10 @@ router.post(
     authMiddleware,
     PermissionController.GetAll
 );
+router.delete(
+    "/delete/:id",
+    authMiddleware,
+    PermissionController.DeletePermission
+);
 
 module.exports = router;

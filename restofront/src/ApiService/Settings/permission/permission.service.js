@@ -6,6 +6,14 @@ const PermissionService = {
         const url = "settings/permission/all";
         return api.post(url, data);
     },
+    Create(payload) {
+        const url = "settings/permission/create";
+        return api.post(url, payload);
+    },
+    Delete(id) {
+        const url = `settings/permission/delete/${id}`;
+        return api.delete(url);
+    },
 
 };
 
