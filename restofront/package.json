@@ -1,6 +1,6 @@
 {
   "name": "restofront",
-  "version": "1.0.7-alpha.0",
+  "version": "1.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",
