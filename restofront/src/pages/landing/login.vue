@@ -6,7 +6,7 @@
         <ion-refresher-content refreshing-spinner="crescent"></ion-refresher-content>
       </ion-refresher>
 
-      <div class="flex flex-col items-center justify-center min-h-full py-8 px-6">
+      <form @submit.prevent="handleManualLogin" class="flex flex-col items-center justify-center min-h-full py-8 px-6">
         
        
 
@@ -167,11 +167,11 @@
           </div>
           
           <p class="text-[10px] text-center text-slate-500 uppercase tracking-widest pt-2">
-            Restaran boshqaruv tizimi v1.0.0
+            Restaran boshqaruv tizimi v{{ version }}
           </p>
         </div>
 
-      </div>
+      </form>
     </ion-content>
   </ion-page>
 </template>
@@ -196,7 +196,8 @@ import {
  water, 
   
 } from 'ionicons/icons';
-
+import pkg from '../../../package.json';
+const version = pkg.version;
 // Native Plugins
 // import { NativeBiometric } from 'capacitor-native-biometric';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';

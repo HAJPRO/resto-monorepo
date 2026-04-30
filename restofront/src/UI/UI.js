@@ -16,6 +16,7 @@ export { default as Modal } from './Modal.vue';
 export { default as Select } from './Select.vue';
 export { default as Table } from './Table.vue';
 export { default as Toast } from './Toast.vue';
+export { default as Toggle } from './Toggle.vue';
 export { default as Upload } from './Upload.vue';
 export { default as DateRangePicker } from './DateRangePicker.vue';
 export { default as Keyboard } from './Keyboard.vue';

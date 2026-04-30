@@ -1,188 +1,144 @@
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
 class UserService {
-  /**
-   * Foydalanuvchi yaratish
-   */
   async CreateUser(req, data) {
-    const { User } = req.tenantModels; // ✅ Dinamik model
+    const { User } = req.tenantModels;
+    const { _id, ...model } = data;
+
     try {
-      const { username, department, password, role, permissions, actions, companyCode } = data;
+      if (_id) {
+        // --- UPDATE MANTIQI ---
 
-      const isExists = await User.findOne({ username });
-      if (isExists) {
-        return { success: false, msg: "Username allaqachon mavjud" };
+        // Username yoki Telefon raqami boshqa foydalanuvchida band emasligini tekshirish
+        const isExists = await User.findOne({
+          _id: { $ne: _id },
+          $or: [
+            { username: model.username },
+            { phoneNumber: model.phoneNumber }
+          ]
+        });
+
+        if (isExists) {
+          return { 
+            status: 400, 
+            msg: "Username yoki telefon raqami allaqachon boshqa xodimga biriktirilgan." 
+          };
+        }
+
+        // Agar yangi parol kelgan bo'lsa, uni hash qilamiz
+        if (model.password) {
+          const salt = await bcrypt.genSalt(10);
+          model.password = await bcrypt.hash(model.password, salt);
+        } else {
+          delete model.password; // Update paytida parolni o'zgartirmaslik uchun
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+          _id,
+          { $set: model },
+          { new: true, runValidators: true }
+        ).populate("roles");
+
+        if (!updatedUser) {
+          return { status: 404, msg: "Foydalanuvchi topilmadi." };
+        }
+
+        return { 
+          status: 200, 
+          msg: "Foydalanuvchi ma'lumotlari muvaffaqiyatli yangilandi!", 
+          user: updatedUser 
+        };
+
+      } else {
+        // --- CREATE MANTIQI ---
+
+        // Unikallikni tekshirish
+        const isExists = await User.findOne({
+          $or: [
+            { username: model.username },
+            { phoneNumber: model.phoneNumber }
+          ]
+        });
+
+        if (isExists) {
+          return { 
+            status: 400, 
+            msg: "Bu username yoki telefon raqami bilan foydalanuvchi allaqachon ro'yxatdan o'tgan." 
+          };
+        }
+
+        // Parolni hash qilish
+        if (model.password) {
+          const salt = await bcrypt.genSalt(10);
+          model.password = await bcrypt.hash(model.password, salt);
+        }
+
+        const user = await User.create(model);
+        
+        return { 
+          status: 201, 
+          msg: "Yangi xodim muvaffaqiyatli qo‘shildi!", 
+          user 
+        };
       }
 
-      // Admin yaratishni cheklash (1000 - admin roli deb hisoblasak)
-      if (role && role == 1000) {
-        return { success: false, msg: "Admin yaratish huquqingiz yo'q!" };
-      }
+    } catch (err) {
+      console.error("User Upsert Error:", err.message);
+      return { 
+        status: 500, 
+        msg: "Serverda xatolik yuz berdi", 
+        error: err.message 
+      };
+    }
+  }
 
-      const hashPassword = await bcrypt.hash(password, 10);
+  async GetAll(req) {
+    const { User } = req.tenantModels;
+
+    try {
+      // Foydalanuvchilarni olish (parolni chiqarib tashlagan holda)
+     const users = await User.find()
+    .select("-password") 
+    .populate({
+        path: "roles",
+        populate: {
+            path: "permissions", // Role modeli ichidagi permissions maydoni nomi
+            model: "Permission"  // Permission modeli nomi
+        }
+    })
+    .sort({ createdAt: -1 })
+    .lean();
+      return { 
+        status: 200,
+        msg: "Barcha foydalanuvchilar ro'yxati", 
+        users 
+      };
+    } catch (err) {
+      console.error("User GetAll Error:", err.message);
+      return { status: 500, msg: "Xatolik yuz berdi", error: err.message };
+    }
+  }
+
+  async DeleteUser(req) {
+    const { User } = req.tenantModels;
+    const id = req.params.id;
+
+    try {
+      // O'chirishdan oldin xodimni topamiz
+      const deletedUser = await User.findByIdAndDelete(id);
       
-      const newUser = await User.create({
-        username,
-        password: hashPassword,
-        department,
-        role,
-        permissions,
-        actions,
-        companyCode // Tenant bazasida ham saqlash foydali bo'lishi mumkin
-      });
-
-      return {
-        success: true,
-        msg: "Foydalanuvchi muvaffaqiyatli yaratildi!",
-        data: newUser,
-      };
+      if (!deletedUser) {
+        return { status: 404, msg: "Foydalanuvchi topilmadi." };
+      }
+      
+      return { status: 200, msg: "Foydalanuvchi tizimdan o'chirildi!" };
     } catch (err) {
-      return { success: false, msg: "Xatolik yuz berdi", error: err.message };
-    }
-  }
-
-  /**
-   * Foydalanuvchi ma'lumotlarini yangilash
-   */
-  async UpdateUser(req, data) {
-    const { User } = req.tenantModels;
-    try {
-      const { _id, username, department, role, permissions, actions, companyCode } = data;
-
-      if (role && role == 1000) {
-        return { success: false, msg: "Admin ma'lumotlarini o'zgartira olmaysiz!" };
-      }
-
-      const updatedUser = await User.findByIdAndUpdate(
-        _id,
-        { username, department, role, permissions, actions, companyCode },
-        { new: true }
-      );
-
-      if (!updatedUser) {
-        return { success: false, msg: "Foydalanuvchi topilmadi" };
-      }
-
-      return {
-        success: true,
-        msg: "Foydalanuvchi muvaffaqiyatli yangilandi!",
-        data: updatedUser,
+      console.error("User Delete Error:", err.message);
+      return { 
+        status: 500, 
+        msg: "Serverda xatolik yuz berdi", 
+        error: err.message 
       };
-    } catch (err) {
-      return { success: false, msg: "Yangilashda xatolik", error: err.message };
-    }
-  }
-
-  /**
-   * Barcha foydalanuvchilarni olish
-   */
- /**
- * Foydalanuvchilar ro'yxatini olish (Filtrlash va Pagination bilan)
- */
-async GetUsers(req) {
-  const { User } = req.tenantModels;
-  try {
-    // 1. Query parametrlarini olish (Front-enddan keladigan filterlar)
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || "";
-    const roleId = req.query.roleId || null;
-
-    // 2. Dinamik Query (Filtr) yaratish
-    const query = { isActive: true }; // Faqat o'chirilmagan foydalanuvchilar
-
-    // Qidiruv mantiqi (FIO, Username yoki Telefon bo'yicha)
-    if (search) {
-      query.$or = [
-        { fullname: { $regex: search, $options: "i" } },
-        { username: { $regex: search, $options: "i" } },
-        { phoneNumber: { $regex: search, $options: "i" } }
-      ];
-    }
-
-    // Rol bo'yicha filtr (Agar tanlangan bo'lsa)
-    if (roleId) {
-      query.roles = roleId;
-    }
-
-    // 3. Ma'lumotlarni bazadan olish
-    const users = await User.find(query)
-      .select("-password -__v") // Parol va versiyani chiqarmaymiz
-     .populate({
-    path: "roles",
-    populate: {
-      path: "permissions" // Mana bu joy permissionlarni ichini ochib beradi
-    }
-  })
-      .sort({ createdAt: -1 }) // Oxirgi qo'shilganlar yuqorida
-      .skip((page - 1) * limit) // Kerakli sahifaga sakrash
-      .limit(limit) // Sahifadagi elementlar soni
-      .lean(); // Mongoose obyektini oddiy JSONga aylantiradi (tezroq ishlaydi)
-
-    // 4. Jami natijalar sonini hisoblash (Frontendda pagination yasash uchun)
-    const totalCount = await User.countDocuments(query);
-
-    return {
-      success: true,
-      status: 200,
-      msg: "Foydalanuvchilar muvaffaqiyatli yuklandi",
-      data: users,
-      pagination: {
-        total: totalCount,
-        currentPage: page,
-        limit: limit,
-        totalPages: Math.ceil(totalCount / limit)
-      }
-    };
-
-  } catch (error) {
-    console.error("GET_USERS_ERROR:", error);
-    return {
-      success: false,
-      status: 500,
-      msg: "Foydalanuvchilarni yuklashda xatolik yuz berdi",
-      error: error.message
-    };
-  }
-}
-
-  /**
-   * Bitta foydalanuvchini ID orqali olish
-   */
-  async GetOneUser(req, data) {
-    const { User } = req.tenantModels;
-    try {
-      // 'roles' emas 'role' bo'lishi mumkin (sxemangizga qarang)
-      const user = await User.findById(data.id).populate('role').populate('permissions');
-      return user;
-    } catch (error) {
-      return { error: true, msg: error.message };
-    }
-  }
-
-  /**
-   * Rollarni olish
-   */
-  async GetRoles(req) {
-    const { Role } = req.tenantModels;
-    try {
-      const roles = await Role.find().lean();
-      return roles;
-    } catch (error) {
-      return { error: true, msg: error.message };
-    }
-  }
-
-  /**
-   * Ruxsatnomalarni olish
-   */
-  async GetPermissions(req) {
-    const { Permission } = req.tenantModels;
-    try {
-      const permissions = await Permission.find().lean();
-      return permissions;
-    } catch (error) {
-      return { error: true, msg: error.message };
     }
   }
 }

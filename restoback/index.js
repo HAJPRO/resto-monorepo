@@ -105,7 +105,7 @@ const {
 // Tenant yo'nalishlari (Dinamik bazaga ulanadigan route'lar)
 tenantRouter.use("/settings/permission", PermissionRouter);
 tenantRouter.use("/settings/role", RoleRouter);
-tenantRouter.use("/settings", UserRouter);
+tenantRouter.use("/settings/user", UserRouter);
 tenantRouter.use("/tabel", TabelRouter);
 tenantRouter.use("/menu", MenuRouter);
 tenantRouter.use("/order", OrderRouter);

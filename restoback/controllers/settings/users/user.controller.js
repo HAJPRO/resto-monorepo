@@ -1,52 +1,74 @@
-const {UserService} = require("../../../services/index.service");
+const { UserService } = require("../../../services/index.service");
 
 class UserController {
-  async createUser(req, res, next) {
+  /**
+   * Foydalanuvchi yaratish yoki tahrirlash (Upsert)
+   * Create & Update mantiqi UserService.CreateUser ichida
+   */
+  async CreateUser(req, res, next) {
     try {
-      const data = await UserService.CreateUser(req,req.body);
+      // req.body ichida _id bo'lsa Update, bo'lmasa Create
+      const data = await UserService.CreateUser(req, req.body);
+      
+      // Service qaytargan status kodiga qarab javob berish (200 yoki 201)
+      res.status(data.status || 200).json(data);
+    } catch (error) {
+      console.error("Controller CreateUser Error:", error);
+      next(error);
+    }
+  }
+
+  /**
+   * Barcha foydalanuvchilarni olish
+   */
+  async GetAll(req, res, next) {
+    try {
+      // Filtratsiya yoki qidiruv parametrlarini req.body orqali yuborish mumkin
+      const data = await UserService.GetAll(req, req.body);
       res.status(200).json(data);
     } catch (error) {
+      console.error("Controller GetAllUsers Error:", error);
       next(error);
     }
   }
-  async UpdateUser(req, res, next) {
+
+  /**
+   * Foydalanuvchini tizimdan o'chirish
+   */
+  async DeleteUser(req, res, next) {
     try {
-      const data = await UserService.UpdateUser(req,req.body);
-      res.status(200).json(data);
+      const data = await UserService.DeleteUser(req);
+      res.status(data.status || 200).json(data);
     } catch (error) {
+      console.error("Controller DeleteUser Error:", error);
       next(error);
     }
   }
-  async GetUsers(req, res, next) {
-    console.log(req.body)
+
+  /**
+   * Parolni yangilash (Reset Password)
+   */
+  async ResetPassword(req, res, next) {
     try {
-      const users = await UserService.GetUsers(req,req.body);
-      res.status(200).json(users);
+      const data = await UserService.ResetPassword(req, req.body);
+      res.status(data.status || 200).json(data);
     } catch (error) {
+      console.error("Controller ResetPassword Error:", error);
       next(error);
     }
   }
-  async GetOneUser(req, res, next) {
+
+  /**
+   * Foydalanuvchi statusini o'zgartirish (Active/Inactive)
+   */
+  async UpdateStatus(req, res, next) {
     try {
-      const user = await UserService.GetOneUser(req,req.body);
-      res.status(200).json(user);
+      const { id } = req.params;
+      const { isActive } = req.body;
+      const data = await UserService.UpdateStatus(id, isActive);
+      res.status(data.status || 200).json(data);
     } catch (error) {
-      next(error);
-    }
-  }
-  async GetRoles(req, res, next) {
-    try {
-      const roles = await UserService.GetRoles(req);
-      res.status(200).json(roles);
-    } catch (error) {
-      next(error);
-    }
-  }
-  async GetPermissions(req, res, next) {
-    try {
-      const permissions = await UserService.GetPermissions(req);
-      res.status(200).json(permissions);
-    } catch (error) {
+      console.error("Controller UpdateStatus Error:", error);
       next(error);
     }
   }

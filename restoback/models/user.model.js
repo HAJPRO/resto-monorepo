@@ -1,156 +1,112 @@
-  const { model, Schema } = require("mongoose");
+const { Schema } = require("mongoose");
 
-  const userSchema = new Schema(
-    {
-      companyCode: { type: String },
-      department: { type: String },
-      isActivated: { type: Boolean, default: false },
-      chatId: {
-        type: String,
-      },
-      action: {
-        type: String,
-       
-        default: "register",
-      },
-
-
-      fullname: {
-        type: String,
-
-        trim: true,
-      },
-      // gender: {
-      //   type: String,
-      //   enum: ["Erkak", "Ayol"],
-
-      // },
-      age: {
-        type: String,
-      },
-      username: {
-        type: String,
-
-      },
-      password: {
-        type: String,
-      },
-      phoneNumber: {
-        type: String,
-        trim: true
-      },
-      // passportNumber: {
-      //   type: String,
-      // },
-      // inn: {
-      //   type: String,
-      // },
-      // email: {
-      //   type: String,
-      // },
-      // telegram: {
-      //   type: String,
-      // },
-
-
-      address: {
-        region: { type: String, default: 0 },
-        district: { type: String, default: 0 },
-        neighborhood: { type: String, default: 0 },
-        street: { type: String, default: 0 },
-        house: { type: String, default: 0 },
-      },
-      roles: [{
-        type: Schema.Types.ObjectId, ref: "Role"
-      }],
-
-      position: {
-        type: String,
-        // enum: ["Yosh haydovchi", "O'rta haydovchi", "Katta haydovchi"],
-        // default: "Haydovchi",
-      },
-      status: {
-        type: String,
-        enum: ["online", "offline", "band", "kutmoqda"],
-        default: "offline"
-      },
-      isActive: {
-        type: Boolean,
-        default: true,
-      },
-      registeredAt: {
-        type: Date,
-        default: Date.now,
-      },
-
-      // Qo'shilgan maydonlar
-      // driverLicenseNumber: {
-      //   type: String,
-      // },
-      // driverLicenseDate: {
-      //   type: Date,
-      // },
-      carNumber: {
-        type: String,
-      },
-      carType: {
-        type: String,
-        // enum: ["Damas", "Labo", "Porter", "Mers", "BMW", "Gentra","Boshqa"],
-      },
-      carColor: {
-        type: String,
-        // enum: ["Qora", "Oq", "Qizil", "Yashil", "Moviy", "Boshqa"],
-      },
-      profileImage: {
-        type: String,
-        default: "default_image_url",
-      },
-      vehicleCapacity: {
-        type: Number,
-        min: 1,
-      },
-      lastLocation: {
-        type: {
-          latitude: { type: Number },
-          longitude: { type: Number },
-        },
-        default: { latitude: 0, longitude: 0 },
-      },
-      location: {
-        type: {
-          lat: { type: Number },
-          long: { type: Number },
-        },
-        default: { lat: 0, long: 0 },
-      },
-      workingHours: {
-        type: {
-          start: { type: Date },
-          end: { type: Date },
-        },
-      },
-      ratings: {
-        type: [Number],
-        default: [],
-      },
-      totalOrders: {
-        type: Number,
-        default: 0,
-      },
-      completedOrders: {
-        type: Number,
-        default: 0,
-      },
-      blockedUntil: {
-        type: Date,
-        default: null,
-      },
-      notes: {
-        type: String,
-        default: "",
-      },
-
+const userSchema = new Schema(
+  {
+    companyCode: { type: String, index: true }, // Tezkor qidiruv uchun index
+    department: { type: String },
+    isActivated: { type: Boolean, default: false },
+    chatId: { type: String, unique: true, sparse: true }, // Telegram bot uchun bo'lsa unique bo'lishi kerak
+image : { type: String, default: "" },
+    fullname: {
+      type: String,
+      required: [true, "To'liq ism kiritilishi shart"],
+      trim: true,
     },
-    { timestamps: true }
-  );
-  module.exports = userSchema;
+    
+    username: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      sparse: true // Bo'sh bo'lsa unique xatosi bermasligi uchun
+    },
+
+    password: {
+      type: String,
+      select: false, // Default holatda querylarda chiqmaydi (xavfsizlik)
+    },
+
+    phoneNumber: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+      // O'zbekiston raqam formati uchun validator
+      validate: {
+        validator: function(v) {
+          return /^\+998[0-9]{9}$/.test(v);
+        },
+        message: props => `${props.value} noto'g'ri telefon raqami!`
+      }
+    },
+
+    age: { type: Number, min: 16 }, // Yosh Number bo'lgani ma'qul
+
+    address: {
+      region: { type: String, default: "" },
+      district: { type: String, default: "" },
+      neighborhood: { type: String, default: "" },
+      street: { type: String, default: "" },
+      house: { type: String, default: "" },
+    },
+
+    roles: [{
+      type: Schema.Types.ObjectId, 
+      ref: "Role",
+      index: true
+    }],
+    position: { type: String, default: "" },  
+description: { type: String, default: "" },
+    status: {
+      type: String,
+      enum: ["online", "offline", "band", "kutmoqda"],
+      default: "offline",
+      index: true
+    },
+
+    // Haydovchilar uchun maxsus blok (Alohida obyektga yig'ish tavsiya etiladi)
+    driverDetails: {
+      carNumber: { type: String, uppercase: true },
+      carType: { type: String },
+      carColor: { type: String },
+      vehicleCapacity: { type: Number, min: 1 },
+      totalOrders: { type: Number, default: 0 },
+      completedOrders: { type: Number, default: 0 },
+    },
+
+    lastLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [long, lat]
+        default: [0, 0]
+      }
+    },
+
+    ratings: {
+      type: [Number],
+      default: [],
+    },
+    
+    blockedUntil: { type: Date, default: null },
+    isActive: { type: Boolean, default: true },
+  },
+
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true }, 
+    toObject: { virtuals: true } 
+  }
+);
+
+// Reyting o'rtachasini hisoblash uchun Virtual field
+userSchema.virtual('averageRating').get(function() {
+  if (this.ratings.length === 0) return 0;
+  const sum = this.ratings.reduce((a, b) => a + b, 0);
+  return (sum / this.ratings.length).toFixed(1);
+});
+
+module.exports = userSchema;
