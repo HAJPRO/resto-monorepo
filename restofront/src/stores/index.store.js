@@ -15,3 +15,5 @@ export { CustomerStore } from './Customer/customer.store';
 export { ZoneStore } from './Zone/zone.store';
 export { TransactionStore } from './Transaction/transaction.store';
 export { StatisticsStore } from './Dashboard/Sale/statistics.store';
+export { InsertStore } from './TMO/Insert/insert.store';
+export { CounterpartyStore } from './Counterparty/counterparty.store';

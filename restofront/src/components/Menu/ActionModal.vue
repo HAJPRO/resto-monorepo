@@ -1,10 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { MenuStore, CategoryStore } from "../../stores/index.store"; 
-import { Button, Select, Modal, Input, TextArea, Upload, Keyboard } from "../../UI/UI";
+import { Button, Select, Modal, Input, TextArea, Upload } from "../../UI/UI";
 import { getBase64 } from "../../utils/imageUploaderOptins/useImageUploader";
-import { restaurantOutline } from 'ionicons/icons';
 
 const store_menu = MenuStore();
 const store_category = CategoryStore();
@@ -17,15 +16,10 @@ const unitOptions = [
   { label: 'Porsiya', value: 'portion' },
   { label: 'Kosa', value: 'bowl' },
   { label: 'Tovoq', value: 'plate' },
-  { label: 'Nafariya', value: 'person' },
-  { label: 'Chashka', value: 'cup' },
-  { label: 'Stakan', value: 'glass' },
-  { label: 'Bo\'lak', value: 'slice' },
   { label: 'Dona', value: 'pcs' },
+  { label: 'Stakan', value: 'glass' },
   { label: 'Kilogramm', value: 'kg' },
-  { label: 'Gramm', value: 'g' },
-  { label: 'Litr', value: 'l' },
-  { label: 'Milli litr', value: 'ml' }
+  { label: 'Litr', value: 'l' }
 ];
 
 const statusOptions = [
@@ -36,24 +30,6 @@ const statusOptions = [
 
 const formRefs = ref([]);
 const touched = ref(false);
-
-// Klaviatura mantiqi
-const keyboardShow = ref(false);
-const activeField = ref(null); // 'price' yoki 'discount_price'
-
-const openKeyboard = (field) => {
-  activeField.value = field;
-  keyboardShow.value = true;
-};
-
-const keyboardValue = computed({
-  get: () => model.value[activeField.value]?.toString() || '',
-  set: (val) => {
-    if (activeField.value) {
-      model.value[activeField.value] = val;
-    }
-  }
-});
 
 const Save = async () => {
   touched.value = true;
@@ -69,6 +45,9 @@ const Save = async () => {
       status: model.value.status,
       description: model.value.description,
       discount_price: Number(model.value.discount_price || 0),
+      // Ombor logikasi
+      is_stock: !!model.value.is_stock,
+      quantity: model.value.is_stock ? Number(model.value.quantity || 0) : 0,
       action: modalAction.value
     };
 
@@ -101,152 +80,175 @@ onMounted(async () => {
   >
     <div class="space-y-5 pb-4 px-1 mt-3">
       
-      <div class="flex flex-col gap-1.5">
-        <Upload 
-          v-model="model.image"
-          type="image"
-          :multiple="false"
-          label="Taom rasmi"
-          accept="image/*"
-          rounded="rounded-[2rem]"
-          class="w-full h-[180px] shadow-sm" 
-        />
-      </div>
+      <!-- 1. Rasm yuklash -->
+      <Upload 
+        v-model="model.image"
+        type="image"
+        label="Taom rasmi"
+        accept="image/*"
+        rounded="rounded-[2rem]"
+        class="w-full h-[180px] shadow-sm" 
+      />
 
-      <div class="flex flex-col gap-1.5">
+      <!-- 2. Nomi va Birligi -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input 
           :ref="el => formRefs[0] = el"
           required
           v-model="model.name"
           :rules="[v => !!v || 'Taom nomini kiriting']"
           label="Taom nomi"
-          placeholder="Masalan: Lavash, Osh..." 
+          placeholder="Lavash, Osh..." 
         />
-      </div>
-
-      <div class="flex flex-col gap-1.5">
         <Select 
           :ref="el => formRefs[3] = el"
           v-model="model.unit"
           label="O'lchov birligi"
           :options="unitOptions" 
-          placeholder="Birlikni tanlang"
+          placeholder="Birlik"
           required
-          searchable
           :rules="[v => !!v || 'Birlikni tanlang']"
         />
       </div>
 
+      <!-- 3. Narxlar -->
       <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <Input 
-            :ref="el => formRefs[1] = el"
-            required
-            :model-value="model.price"
-            readonly
-            @click="openKeyboard('price')"
-            :rules="[v => !!v || 'Narxni kiriting']"
-            label="Narxi (UZS)"
-            placeholder="35000"
-            class="cursor-pointer"
-            isFormatted
-          >
-            <template #append v-if="activeField === 'price' && keyboardShow">
-              <span class="w-1 h-5 bg-indigo-500 animate-pulse"></span>
-            </template>
-          </Input>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <Input 
-            :ref="el => formRefs[2] = el"
-            :model-value="model.discount_price"
-            
-            @click="openKeyboard('discount_price')"
-            label="Chegirma narxi"
-            placeholder="Ixtiyoriy..."
-            class="cursor-pointer"
-            clearable
-            isFormatted
-          >
-            <template #append v-if="activeField === 'discount_price' && keyboardShow">
-              <span class="w-1 h-5 bg-indigo-500 animate-pulse"></span>
-            </template>
-          </Input>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <Select 
-            :ref="el => formRefs[4] = el"
-            v-model="model.category"
-            label="Kategoriya"
-            :options="categories" 
-            labelKey="name"
-            valueKey="name"
-            placeholder="Tanlang"
-            required
-            :rules="[v => !!v || 'Kategoriyani tanlang']"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <Select 
-            :ref="el => formRefs[5] = el"
-            v-model="model.status"
-            label="Holati"
-            :options="statusOptions" 
-            placeholder="Holat"
-            required
-            :rules="[v => !!v || 'Holatni tanlang']"
-          />
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-1.5">
-        <TextArea 
-          :ref="el => formRefs[6] = el"
-          v-model="model.description"
-          label="Tavsif"
-          placeholder="Taom tarkibi va h.k."
-          counter
-          maxlength="300"
-          :rules="[v => !!v || 'Tavsif yozish majburiy']"
+        <Input 
+          :ref="el => formRefs[1] = el"
+          required
+          v-model="model.price"
+          type="number"
+          label="Narxi (UZS)"
+          placeholder="35000"
+          :rules="[v => !!v || 'Narxni kiriting']"
+        />
+        <Input 
+          :ref="el => formRefs[2] = el"
+          v-model="model.discount_price"
+          type="number"
+          label="Chegirma narxi"
+          placeholder="Ixtiyoriy..."
         />
       </div>
+
+      <!-- 4. Ombor logikasi -->
+      <!-- Shart: Yangi mahsulot bo'lsa ko'rinadi, editda faqat is_stock: true bo'lganlar ko'rinadi -->
+      <div 
+        v-if="modalAction !== 'edit' || model.is_stock"
+        class="p-4 bg-slate-50 dark:bg-white/5 rounded-[2rem] border border-dashed border-slate-200 dark:border-white/10"
+      >
+        <div 
+          class="flex items-center justify-between"
+          :class="modalAction === 'edit' ? 'cursor-not-allowed' : 'cursor-pointer'"
+          @click="modalAction !== 'edit' ? model.is_stock = !model.is_stock : null"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm text-indigo-500">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Ombor hisobi</span>
+              <span class="text-[11px] text-slate-400 italic">Soni hisoblanadigan mahsulotlar uchun</span>
+            </div>
+          </div>
+          <input 
+            type="checkbox" 
+            v-model="model.is_stock" 
+            :disabled="modalAction === 'edit'"
+            @click.stop
+            class="w-5 h-5 accent-indigo-600" 
+          />
+        </div>
+
+        <Transition name="expand">
+          <div v-if="model.is_stock" class="mt-4 pt-4 border-t border-slate-200/50 dark:border-white/5">
+            <Input 
+              :ref="el => formRefs[7] = el"
+              required
+              v-model="model.quantity"
+              type="number"
+              label="Mavjud miqdor (Qoldiq)"
+              placeholder="Masalan: 100"
+              :disabled="modalAction === 'edit'"
+              :hint="modalAction === 'edit' ? 'Qoldiqni tahrirlash cheklangan' : 'Ilk kirim miqdorini yozing'"
+              :rules="[v => (model.is_stock ? !!v : true) || 'Miqdorni kiriting']"
+              class="disabled:opacity-70 disabled:bg-slate-100 dark:disabled:bg-slate-800"
+            />
+          </div>
+        </Transition>
+      </div>
+
+      <!-- 5. Kategoriya va Status -->
+      <div class="grid grid-cols-2 gap-4">
+        <Select 
+          :ref="el => formRefs[4] = el"
+          v-model="model.category"
+          label="Kategoriya"
+          :options="categories" 
+          labelKey="name"
+          valueKey="name"
+          placeholder="Tanlang"
+          required
+          :rules="[v => !!v || 'Kategoriyani tanlang']"
+        />
+        <Select 
+          :ref="el => formRefs[5] = el"
+          v-model="model.status"
+          label="Holati"
+          :options="statusOptions" 
+          placeholder="Holat"
+          required
+          :rules="[v => !!v || 'Holatni tanlang']"
+        />
+      </div>
+
+      <!-- 6. Tavsif -->
+      <TextArea 
+        :ref="el => formRefs[6] = el"
+        v-model="model.description"
+        label="Tavsif"
+        placeholder="Taom tarkibi va boshqalar..."
+        counter
+        maxlength="300"
+        :rules="[v => !!v || 'Tavsif majburiy']"
+      />
     </div>
 
+    <!-- Footer -->
     <template #footer>
-      <div class="py-1 px-4 flex gap-2">
+      <div class="py-1 px-2 flex gap-3">
         <Button 
-          leftIcon="fa-solid fa-xmark"
+        size="sm"
           variant="danger"
-          size="sm"
           @click="isModal = false"
+          leftIcon="fa-solid fa-xmark"
+          
         >
           Bekor qilish
-        </Button>
+
+          </Button>
         <Button 
+        size="sm"
           @click="Save()"
-          size="sm"
-          leftIcon="fas fa-check"
-          class="!bg-indigo-600 hover:!bg-indigo-700 shadow-lg shadow-indigo-200"
+          variant="primary"
+          class="flex-1 !bg-indigo-600 hover:!bg-indigo-700 shadow-lg shadow-indigo-200 text-white font-bold"
         >
           {{ modalAction === 'edit' ? 'O\'zgartirish' : 'Saqlash' }}
         </Button>
       </div>
     </template>
-
-    <Keyboard 
-      v-model="keyboardValue" 
-      :show="keyboardShow" 
-      @close="keyboardShow = false; activeField = null" 
-    />
   </Modal>
 </template>
 
 <style scoped>
-/* Kerakli qo'shimcha stillar */
-.cursor-pointer :deep(input) {
-  cursor: pointer;
+.expand-enter-active, .expand-leave-active {
+  transition: all 0.3s ease-in-out;
+  max-height: 120px;
+  overflow: hidden;
+}
+.expand-enter-from, .expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
 }
 </style>

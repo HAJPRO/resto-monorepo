@@ -161,7 +161,10 @@ import {
   cubeOutline, personOutline, swapVerticalOutline, printOutline,
   cashOutline, layersOutline, briefcaseOutline, walletOutline, idCardOutline,
   businessOutline, gridOutline,
-  locationOutline
+  locationOutline,
+  fileTray,
+  fileTrayOutline,
+  filterOutline
 } from "ionicons/icons";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
@@ -188,6 +191,10 @@ const sidebarSections = {
     { label: "Mijozlar ro'yxati", routeName: "customer", icon: peopleOutline },
     { label: "Mijozlar qarzdorligi", routeName: "customer", icon: walletOutline }
   ]},
+   counterparty: { label: "Kontragentlar", icon: briefcaseOutline, subs: [
+    { label: "Kontragentlar ro'yxati", routeName: "counterparty", icon: peopleOutline },
+    { label: "Kontragentlar qarzdorligi", routeName: "customer", icon: walletOutline }
+  ]},
   product: { label: "Mahsulotlar", icon: cubeOutline, subs: [
     { label: "Mahsulotlar", routeName: "menu", icon: cubeOutline },
     { label: "Kategoriyalar", routeName: "category", icon: gridOutline }
@@ -206,19 +213,21 @@ const sidebarSections = {
   ]},
   tmo: { label: "TMO", icon: layersOutline, subs: [
     { label: "Mahsulotlar", routeName: "menu", icon: cubeOutline },
+    { label: "Kirim qilish", routeName: "insert", icon: swapVerticalOutline },
+    { label: "Kirim hujjatlari", routeName: "inserthistory", icon: filterOutline },
+
     { label: "Kategoriyalar", routeName: "category", icon: personOutline },
-    { label: "Kirim-chiqim", routeName: "statistic", icon: swapVerticalOutline },
-    { label: "Sotuv qilish", routeName: "statistic", icon: cashOutline }
+{ label: "Kontragentlar", routeName: "counterparty", icon: businessOutline }
   ]},
   inventory: { label: "Omborxona", icon: archiveOutline, subs: [
     { label: "Mahsulotlar", routeName: "menu", icon: cubeOutline },
-    { label: "Kirim-chiqim", routeName: "statistic", icon: swapVerticalOutline }
+    { label: "Kirim-chiqim", routeName: "statistic", icon: swapVerticalOutline },
   ]}
 };
 
 const staffSubs = [
   { label: "Foydalanuvchilar", routeName: "settingsusers", icon: personOutline, roles: ['1000'] },
-  { label: "Rollar", routeName: "settingsroles", icon: ribbonOutline, roles: ['1000'] },
+  { label: "Huquqlar", routeName: "settingsroles", icon: ribbonOutline, roles: ['1000'] },
   { label: "Ruxsatlar", routeName: "settingspermissions", icon: shieldCheckmarkOutline, roles: ['1000'] },
   { label: "Chek sozlamalari", routeName: "check", icon: printOutline },
   { label: "Xizmat foizi (%)", routeName: "fee", icon: receiptOutline },

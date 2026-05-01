@@ -14,5 +14,7 @@ module.exports = {
   FeeService: require("./Settings/service/fee.service.js"),
   TabelService: require("./Tabel/tabel.service.js"),
   TransactionService: require("./Transaction/transaction.service.js"),
-  StatisticsService: require("./Dashboard/Sale/statistics.service.js")
+  StatisticsService: require("./Dashboard/Sale/statistics.service.js"),
+  CounterpartyService: require("./Counterparty/counterparty.service.js"),
+  InsertService: require("./TMO/Insert.service.js")
 };

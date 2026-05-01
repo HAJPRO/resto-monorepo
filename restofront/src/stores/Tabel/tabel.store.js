@@ -21,6 +21,8 @@ export const TabelStore = defineStore('TabelStore', {
 
   actions: {
     async ModalAction(payload) {
+      console.log(payload);
+      
       this.modalAction = payload?.action; 
       if(payload?.action === 'edit') {
         const response = await TabelService.GetById(payload.id);

@@ -14,5 +14,8 @@ module.exports = {
   FeeRouter: require("./settings/service/fee.route.js"),
   TabelRouter: require("./tabel/tabel.route.js"),
   TransactionRouter: require("./transaction/transaction.route.js"),
- StatisticsRouter: require("./dashboard/sale/statistics.route.js")
+  CounterpartyRouter: require("./counterparty/counterparty.route.js"),
+  StatisticsRouter: require("./dashboard/sale/statistics.route.js"),
+  InsertRouter: require("./tmo/insert.route.js")
+ 
 };

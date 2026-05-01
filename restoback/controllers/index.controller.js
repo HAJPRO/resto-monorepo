@@ -14,5 +14,8 @@ module.exports = {
   FeeController: require("./settings/service/fee.controller.js"),
   TabelController: require("./Tabel/tabel.controller.js"),
   TransactionController: require("./Transaction/transaction.controller.js"),
-  StatisticsController: require("./Dashboard/Sale/statistics.controller.js")
+  StatisticsController: require("./Dashboard/Sale/statistics.controller.js"),
+  CounterpartyController: require("./Counterparty/counterparty.controller.js"),
+  InsertController: require("./TMO/insert.controller.js")
+  
 };

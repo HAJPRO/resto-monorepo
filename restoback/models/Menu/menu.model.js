@@ -7,27 +7,40 @@ const MenuSchema = new Schema(
       required: true,
       trim: true,
     },
-    unit: {
-      type: String,
-      required: true,
-      trim: true,
-      default: "1 porsiya", // Masalan: "100gr", "1 dona"
+    // Ombor logikasi uchun eng muhim maydonlar:
+    is_stock: { 
+      type: Boolean, 
+      default: false // true bo'lsa - soni hisoblanadigan (ichimliklar), false - oshxona taomi
     },
-    image: {
-      type: String, // Rasm yo'li (URL yoki path)
-      default: "default.jpg", // Agar rasm ko'rsatilmasa, default rasm
+    quantity: {
+      type: Number,
+      default: 0, // Agar is_stock true bo'lsa, bu yerda qoldiq soni saqlanadi
     },
+    min_threshold: {
+      type: Number,
+      default: 5, // Mahsulot shu sondan kam qolsa, tizim ogohlantirish berishi uchun
+    },
+    // Kirim jarayoni uchun muhim:
+    costPrice: { 
+      type: Number, 
+      default: 0 // Oxirgi kirim qilingan tannarx
+    },
+    // Asosiy ma'lumotlar
     price: {
-      type: Number, // Narxlar bilan ishlashda Number yaxshiroq
+      type: Number,
       required: true,
       default: 0,
     },
     discount_price: {
-      type: Number, // Chegirma narxi
+      type: Number,
       default: 0,
     },
+    unit: {
+      type: String,
+      default: "1 porsiya", // Masalan: "1 dona", "0.5 L", "1 kg"
+    },
     category: {
-      type: String, // Masalan: 'soups', 'drinks', 'main_dishes'
+      type: String,
       required: true,
     },
     status: {
@@ -35,37 +48,43 @@ const MenuSchema = new Schema(
       required: true,
       enum: ["active", "out_of_stock", "hidden"],
       default: "active",
-      // Izohlar:
-      // "active"       -> Sotuvda mavjud
-      // "out_of_stock" -> Vaqtincha tugagan
-      // "hidden"       -> Menyuda ko'rinmaydi
+    },
+    image: {
+      type: String,
+      default: "default.jpg",
     },
     description: {
-      type: String, // Taom tarkibi va tavsifi
+      type: String,
       required: true,
     },
     is_popular: {
-      type: Boolean, // "Mashhur taom" belgisi
+      type: Boolean,
       default: false,
     },
     cooking_time: {
-      type: String, // Tayyorlanish vaqti (Masalan: "15-20 min")
+      type: String,
       default: "15",
     },
-    // Agar ingredientlarni alohida saqlamoqchi bo'lsangiz
     ingredients: [{
       type: String
     }],
-    // O'lchov birligi
-    unit: {
-      type: String,
-      default: "1 porsiya", // Masalan: "100gr", "1 dona"
-    }
   }, 
   {
-    timestamps: true, // Yaratilgan va yangilangan vaqtni saqlaydi
+    timestamps: true,
   }
 );
 
+// Middleware: Soni o'zgarganda statusni avtomatik yangilash
+MenuSchema.pre('save', function(next) {
+  if (this.is_stock) {
+    if (this.quantity <= 0) {
+      this.status = "out_of_stock";
+      this.quantity = 0; // Minusga tushib ketmasligi uchun
+    } else {
+      this.status = "active";
+    }
+  }
+  next();
+});
 
 module.exports = MenuSchema;

@@ -53,6 +53,11 @@ async GetById(req) {
         data 
     };
 }
+async Delete(req) {
+    const { Menu } = req.tenantModels;
+    await Menu.findByIdAndDelete(req.params.id);
+    return { status : 200, msg: "Muvaffaqiyatli o'chirildi" };
+}
 
 ////Kategoriya 
 async CreateCategory(req) { // 1. async qo'shildi

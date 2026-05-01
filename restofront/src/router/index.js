@@ -44,6 +44,9 @@ const routes = [
       { path: 'category', name: 'category', component: () => import('../pages/explore/Menu/Category/index.vue') },
       { path: 'zone', name: 'zone', component: () => import('../pages/explore/Zone/index.vue') },
       { path: 'transaction', name: 'transaction', component: () => import('../pages/explore/Transaction/index.vue') },
+      { path: 'insert', name: 'insert', component: () => import('../pages/explore/TMO/Insert/index.vue') },
+      { path: 'insert/history', name: 'inserthistory', component: () => import('../pages/explore/TMO/InsertHistory/index.vue') },
+      { path: 'counterparty', name: 'counterparty', component: () => import('../pages/explore/Counterparty/index.vue') },
 
     ],
     meta: { requiresAuth: true }

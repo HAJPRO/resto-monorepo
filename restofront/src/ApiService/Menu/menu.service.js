@@ -18,6 +18,9 @@ const MenuService = {
         const url = `menu/get/${id}`;
         return api.get(url);
         },
+    Delete(id) {
+        const url = `menu/delete/${id}`;
+        return api.delete(url);},
 
         // --- CATEGORY API ---
     CreateCategory(payload) {

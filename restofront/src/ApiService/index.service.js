@@ -14,4 +14,6 @@ export { default as CustomerService } from './Customer/customer.service';
 export { default as ZoneService } from './Zone/zone.service';
 export { default as TransactionService } from './Transaction/transaction.service';
 export { default as StatisticsService } from './Dashboard/Sale/statistics.service';
+export { default as InsertService } from './TMO/Insert/insert.service';
+export { default as CounterpartyService } from './Counterparty/counterparty.service';
 

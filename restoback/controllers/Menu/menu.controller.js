@@ -46,6 +46,14 @@ class MenuController {
       next(error);
     }
   }
+  async Delete(req, res, next) {
+    try {
+      const data = await MenuService.Delete(req);
+      return res.status(data.status).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 
   async CreateCategory(req, res, next) {
     try {

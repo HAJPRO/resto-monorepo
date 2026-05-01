@@ -38,7 +38,7 @@ onMounted(() => store.GetAll());
 
 <template>
   <ion-page class="bg-[#F8FAFC] dark:bg-[#020617]">
-    <Header title="Xodimlar" searchable v-model="searchQuery">
+    <Header title="Foydalanivchilar" searchable v-model="searchQuery">
       <template #actions>
          <Button @click="openModal('create')" icon="fas fa-user-plus" size="sm" />
       </template>

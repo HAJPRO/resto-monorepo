@@ -350,7 +350,7 @@ const handleTableClick = async (table) => {
   // Bo'sh stol (Status 0)
   if (table.status === '0' || table.status === 0) {
     store_menu.clearCart(); // Oldingi qoldiqlarni tozalash
-    store_menu.selectedTable = table; // Butun obyektni saqlash ma'qul (ID: table._id)
+    store_menu.selectedTable = table._id; // Butun obyektni saqlash ma'qul (ID: table._id)
     router.push({ name: 'menu' });
   } 
   // Band, Savat yoki Hisob holatidagi stol
