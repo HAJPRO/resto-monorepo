@@ -7,7 +7,7 @@
           <div class="flex items-center gap-3">
             <Button v-if="showBack" @click="handleBack" icon="fas fa-arrow-left" size="sm" />
             
-            <h1 class="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-3">
+            <h1 @click="goHome" class="text-lg font-black text-slate-900 dark:text-white tracking-tight mt-3 cursor-pointer">
               {{ title }}
             </h1>
           </div>
@@ -79,6 +79,10 @@ const toggleSearch = () => {
 
 const handleBack = () => {
   router.back();
+};
+
+const goHome = () => {
+  router.push('/');
 };
 </script>
 

@@ -164,7 +164,8 @@ import {
   locationOutline,
   fileTray,
   fileTrayOutline,
-  filterOutline
+  filterOutline,
+  calculatorOutline
 } from "ionicons/icons";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
@@ -211,8 +212,8 @@ const sidebarSections = {
     { label: "Xaridlar", routeName: "home", icon: cartOutline },
     { label: "Yetkazib beruvchilar", routeName: "home", icon: peopleOutline }
   ]},
-  cash: { label: "Buxgalterya", icon: cashOutline, subs: [
-    { label: "Kassa", routeName: "cash", icon: cashOutline },
+  cash: { label: "Buxgalterya", icon: calculatorOutline, subs: [
+    { label: "Kassa", routeName: "cash", icon: walletOutline },
     { label: "Hisobotlar", routeName: "home", icon: fileTrayOutline }
   ]},
   tmo: { label: "TMO", icon: layersOutline, subs: [
