@@ -24,3 +24,4 @@ export { default as GlobalRefresher } from './GlobalRefresher.vue';
 export { default as LoadingState } from './LoadingState.vue';
 export { default as Header } from './Header.vue';
 export { default as EmptyState } from './EmptyState.vue';
+export { default as SegmentTabs } from './SegmentTabs.vue';

@@ -57,7 +57,8 @@ import {
   receipt, receiptOutline,
   grid, gridOutline, 
   barChartSharp,
-  barChartOutline
+  barChartOutline,
+  cashOutline
 } from 'ionicons/icons';
 
 import { computed } from 'vue';
@@ -73,6 +74,7 @@ const navLinks = [
   { tab: 'home', label: 'Asosiy', url: '/explore/home', icon: homeOutline, activeIcon: home },
   { tab: 'menu', label: 'Menyu', url: '/explore/menu', icon: restaurantOutline, activeIcon: restaurant },
   { tab: 'tables', label: 'Stollar', url: '/explore/tables', icon: gridOutline, activeIcon: grid },
+  { tab: 'cash', label: 'Kassa', url: '/explore/cash', icon: cashOutline, activeIcon: cashOutline },
   { tab: 'order', label: 'Buyurtmalar', url: '/explore/order', icon: receiptOutline, activeIcon: receipt },
   { 
   tab: 'statistic', 

@@ -172,7 +172,7 @@ const route = useRoute();
 
 // --- STATE ---
 const openSections = ref({
-  staff: false, supply: false, inventory: false, tmo: false, settings: false, custom: false, product: false,zone:false
+  staff: false, supply: false, inventory: false, tmo: false, settings: false, custom: false, product: false,zone:false, counterparty: false, cash: false
 });
 
 // --- CONFIGS ---
@@ -210,6 +210,10 @@ const sidebarSections = {
   supply: { label: "Ta'minot", icon: briefcaseOutline, subs: [
     { label: "Xaridlar", routeName: "home", icon: cartOutline },
     { label: "Yetkazib beruvchilar", routeName: "home", icon: peopleOutline }
+  ]},
+  cash: { label: "Buxgalterya", icon: cashOutline, subs: [
+    { label: "Kassa", routeName: "cash", icon: cashOutline },
+    { label: "Hisobotlar", routeName: "home", icon: fileTrayOutline }
   ]},
   tmo: { label: "TMO", icon: layersOutline, subs: [
     { label: "Mahsulotlar", routeName: "menu", icon: cubeOutline },

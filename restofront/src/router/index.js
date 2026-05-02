@@ -47,6 +47,7 @@ const routes = [
       { path: 'insert', name: 'insert', component: () => import('../pages/explore/TMO/Insert/index.vue') },
       { path: 'insert/history', name: 'inserthistory', component: () => import('../pages/explore/TMO/InsertHistory/index.vue') },
       { path: 'counterparty', name: 'counterparty', component: () => import('../pages/explore/Counterparty/index.vue') },
+      { path: 'cash', name: 'cash', component: () => import('../pages/explore/Cash/index.vue') },
 
     ],
     meta: { requiresAuth: true }
