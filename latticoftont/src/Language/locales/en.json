@@ -1,0 +1,44 @@
+{
+  "title": {
+    "planning": "Planning"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search...",
+    "no_index": "№",
+    "total": "Total",
+    "page_per": "Per Page",
+    "units": "units"
+  },
+  "columns": {
+    "analysis_id": "Analysis ID / Date",
+    "supplier": "Main Supplier",
+    "lab_results": "Laboratory Results",
+    "total_amount": "Total Amount",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "total_milk": "Total Milk Volume",
+    "production_line": "Production Line"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "password": "Password"
+  },
+   "planning" : {
+    "plan_create" : "Plan",
+    "excel_export" : "Export to Excel",
+    "pdf_export" : "Export to PDF",
+    "export_format" : "Export format",
+    "description_excel": "Full table (.xlsx)",
+    "description_pdf": "Printable (.pdf)"
+  }
+}

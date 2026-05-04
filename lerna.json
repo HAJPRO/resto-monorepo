@@ -3,7 +3,9 @@
   "version": "independent",
   "packages": [
     "restoback",
-    "restofront"
+    "restofront",
+    "latticoback",
+    "latticofront"
   ],
   "npmClient": "npm",
   "command": {
