@@ -3,7 +3,7 @@ const tenantConnections = {};
 
 const getTenantDB = async (dbName) => {
     // Agar tenantId kelmasa, default baza
-    const finalDbName = (dbName && dbName.trim() !== '') ? dbName.trim() : "restouz";
+    const finalDbName = (dbName && dbName.trim() !== '') ? dbName.trim() : "lattico";
 
     // 1. Keshni tekshirish
     if (tenantConnections[finalDbName] && tenantConnections[finalDbName].readyState === 1) {

@@ -1,4 +1,4 @@
-package resto.uz.app;
+package lattico.app;
 
 import com.getcapacitor.BridgeActivity;
 

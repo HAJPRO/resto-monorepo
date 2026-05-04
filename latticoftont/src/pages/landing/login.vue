@@ -104,19 +104,16 @@
                   bg-gradient-to-br from-blue-700 to-indigo-800 
                   shadow-[0_12px_24px_-5px_rgba(37,99,235,0.4)] 
                   transition-all duration-500 group-hover:scale-105 group-hover:-rotate-3">
-        <ion-icon :icon="restaurant" class="text-2xl text-white"></ion-icon>
+        <ion-icon :icon="water" class="text-2xl text-white"></ion-icon>
         
         <div class="absolute inset-0 rounded-2xl border border-white/20"></div>
       </div>
 
       <h1 class="flex items-center gap-1 text-4xl font-black tracking-tighter select-none mt-3">
   <span class="text-slate-900 dark:text-white transition-colors duration-300">
-    Resto
+    Lattico
   </span>
-  <span class="relative">
-    <span class="text-indigo-600 dark:text-indigo-400 italic">.uz</span>
-    <span class="absolute -bottom-1 left-0 w-full h-1 bg-indigo-500/20 blur-sm rounded-full"></span>
-  </span>
+  
 </h1>
     </div>
 
@@ -316,7 +313,7 @@ const handleManualLogin = async () => {
 
 //     const verified = await NativeBiometric.verify({
 //       reason: "Xavfsiz kirish uchun shaxsingizni tasdiqlang",
-//       title: "Resto.uz Xavfsizlik",
+//       title: "Lattico.uz Xavfsizlik",
 //       subtitle: "Biometrik kirish",
 //       description: "Barmog'ingizni datchikka qo'ying"
 //     });

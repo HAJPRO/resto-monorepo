@@ -1,6 +1,6 @@
 {
-  "appId": "resto.uz.app",
-  "appName": "Resto Uz",
+  "appId": "lattico.app",
+  "appName": "Lattico",
   "webDir": "dist",
   "bundledWebRuntime": false
 }
