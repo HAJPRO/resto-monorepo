@@ -27,8 +27,13 @@ const routes = [
         path: '', 
         redirect: '/explore/home' 
       },
+
       { path: 'home', name: 'home', component: () => import('../pages/explore/Home/index.vue') },
       { path: 'statistic', name: 'statistic', component: () => import('../pages/explore/Dashboard/sale/index.vue') },
+
+      // Laboratory
+      { path: 'laboratory/rawmilk', name: 'rawmilk', component: () => import('../pages/explore/Laboratory/Rawmilk/index.vue') },
+
       { path: 'menu', name: 'menu', component: () => import('../pages/explore/Menu/index.vue') },
       { path: 'order', name: 'order', component: () => import('../pages/explore/Order/index.vue') },
       { path: 'tables', name: 'tables', component: () => import('../pages/explore/Tabels/index.vue') },

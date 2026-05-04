@@ -239,7 +239,7 @@ const sidebarSections = {
   label: "Laboratoriya", 
   icon: flask, 
   subs: [
-    { label: "Sut qabuli", routeName: "home", icon: logInOutline },
+    { label: "Sut qabuli", routeName: "rawmilk", icon: logInOutline },
     { label: "Sifat tahlili", routeName: "menu", icon: checkboxOutline },
     { label: "Sovutish qozonlari", routeName: "order", icon: thermometerOutline },
     { label: "Xomashyo statistikasi", routeName: "order", icon: statsChartOutline }
