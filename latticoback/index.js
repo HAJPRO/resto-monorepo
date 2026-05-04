@@ -16,7 +16,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:5000",
-    "https://restouz-core.company-erp.uz",
+    "https://lacto-core.company-erp.uz",
     "capacitor://localhost",   // iOS uchun
     "https://localhost",       // Android APK uchun (Eng muhimi)
     "http://localhost"         // Ba'zi Android versiyalar uchun
