@@ -17,3 +17,6 @@ export { TransactionStore } from './Transaction/transaction.store';
 export { StatisticsStore } from './Dashboard/Sale/statistics.store';
 export { InsertStore } from './TMO/Insert/insert.store';
 export { CounterpartyStore } from './Counterparty/counterparty.store';
+
+// LABORATORY
+export { RawmilkStore } from './Laboratory/Rawmilk/rawmilk.store';

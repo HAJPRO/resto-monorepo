@@ -1,6 +1,0 @@
-{
-  "appId": "lattico.app",
-  "appName": "Lattico",
-  "webDir": "dist",
-  "bundledWebRuntime": false
-}

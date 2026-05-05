@@ -1,7 +1,0 @@
-{
-  "name": "restofront",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue-vite"
-}
