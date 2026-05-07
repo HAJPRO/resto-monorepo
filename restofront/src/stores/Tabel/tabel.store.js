@@ -81,7 +81,7 @@ export const TabelStore = defineStore('TabelStore', {
     },
 //Payment Modal
   PaymentModalAction(table) {
-    console.log(table.cartId);
+    console.log(table);
     
     this.activeTable = table.tableId ? table.tableId : table ;
     const cart = table.cartId  ? table.cartId : table;
@@ -105,7 +105,7 @@ export const TabelStore = defineStore('TabelStore', {
 
  async SubmitPayment() {
   const p = this.model_payment;
-  const cart = this.activeTable?.cartId;
+  const cart = this.activeTable?.cartId ? this.activeTable.cartId : this.activeTable; // activeTable'dan cartId ni olish yoki activeTable ni to'g'ridan-to'g'ri olish
   const { toast } = useToast();
 
   if (!cart) return;

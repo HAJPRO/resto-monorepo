@@ -4,7 +4,7 @@ import { StatisticsService } from "../../../ApiService/index.service";
 export const StatisticsStore = defineStore('StatisticsStore', {
   state: () => ({
     loading: false,
-    activeFilter: 'Hafta',
+    activeFilter: 'Kun',
     
     // Dashboard asosiy ma'lumotlari
     totalRevenue: 0,

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80  backdrop-blur-md">
+  <div class="w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80  backdrop-blur-md rounded-2xl">
     <div ref="scrollContainer" class="flex overflow-x-auto no-scrollbar py-1 px-4 sm:justify-center">
       
       <div ref="container" class="relative flex p-1 bg-slate-100/50 dark:bg-white/5 rounded-full min-w-max sm:min-w-[400px]">
