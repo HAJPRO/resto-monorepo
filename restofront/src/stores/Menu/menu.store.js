@@ -2,9 +2,11 @@ import { defineStore } from "pinia";
 import { useToast } from "../../UI/utils/useToast";
 import { MenuService } from "../../ApiService/index.service";
 import { TabelStore, FeeStore } from "../../stores/index.store";
+import { jwtDecode } from 'jwt-decode';
 
 export const MenuStore = defineStore('MenuStore', {
   state: () => ({
+    
     model: { _id: null }, 
     cartItems: [], // Savatdagi mahsulotlar
     isCartOpen: false,
@@ -36,6 +38,15 @@ export const MenuStore = defineStore('MenuStore', {
   }),
 
   getters: {
+    // Foydalanuvchi ID sini har safar yangi olish
+    getUserId: () => {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+      try {
+        const decoded = jwtDecode(token);
+        return decoded.id || decoded._id;
+      } catch (e) { return null; }
+    },
     // Savatdagi jami elementlar soni
     totalItemsCount: (state) => state.cartItems.reduce((sum, item) => sum + item.cartQuantity, 0),
     
@@ -219,6 +230,7 @@ export const MenuStore = defineStore('MenuStore', {
 
         const orderData = {
           orderType: this.orderType,
+          createdBy: this.getUserId,
           items: this.cartItems.map(item => ({
             foodId: item.id,
             name: item.name,

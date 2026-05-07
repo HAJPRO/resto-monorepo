@@ -100,7 +100,8 @@ const {
   ZoneRouter, 
   TransactionRouter,
   StatisticsRouter,
-  CounterpartyRouter,InsertRouter
+  CounterpartyRouter,InsertRouter,
+  CashRouter
 } = require("./routes/index.route");
 
 // Tenant yo'nalishlari (Dinamik bazaga ulanadigan route'lar)
@@ -131,6 +132,9 @@ tenantRouter.use("/counterparty", CounterpartyRouter);
 
 // Insert
 tenantRouter.use("/insert", InsertRouter);
+
+// Cash
+tenantRouter.use("/cash", CashRouter);
 
 // Tenant routerni asosiy app ga ulash
 app.use("/api/v1", tenantRouter);

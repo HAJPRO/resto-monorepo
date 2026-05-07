@@ -16,4 +16,5 @@ export { default as TransactionService } from './Transaction/transaction.service
 export { default as StatisticsService } from './Dashboard/Sale/statistics.service';
 export { default as InsertService } from './TMO/Insert/insert.service';
 export { default as CounterpartyService } from './Counterparty/counterparty.service';
+export { default as CashService } from './Cash/cash.service';
 

@@ -17,7 +17,7 @@ router.post(
 );
 
 router.post("/all", tenantMiddleware, OrderController.GetAll);
-router.post("/payment", tenantMiddleware, OrderController.SubmitPayment);
+router.post("/payment", authMiddleware, tenantMiddleware, OrderController.SubmitPayment);
 // router.get("/get/:id", tenantMiddleware, OrderController.GetById);
 
 

@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const CartSchema = new Schema({
-  // ... (items, subtotal, serviceFee va boshqa maydonlar o'zgarishsiz qoladi)
+  // ... (items, subtotal va boshqa maydonlar o'zgarishsiz qoladi)
+  orderNumber: { type: String, unique: true, index: true },
   orderType: { type: String, enum: ['table', 'takeaway'], required: true, default: 'table' },
   items: [{
     foodId: { type: Schema.Types.ObjectId, ref: 'Menu', required: true },
@@ -21,51 +22,44 @@ const CartSchema = new Schema({
   
   finalTotal: { type: Number, required: true, index: true },
 
-  // --- Yangilangan To'lov Qismi ---
+  // --- To'lov Qismi ---
   paymentMethod: {
     type: String,
-    // 'balance' qo'shildi - bu mijoz o'z depozitidan to'laganini bildiradi
     enum: ['cash', 'card', 'debt', 'balance', 'mixed', 'unpaid'], 
     default: 'unpaid',
     index: true
   },
 
   payments: [{
-    type: { 
-      type: String, 
-      // 'balance' qo'shildi - massiv ichida qaysi qismi depozitdan yechilganini bilish uchun
-      enum: ['cash', 'card', 'debt', 'balance'], 
-      required: true 
-    },
-    amount: { 
-      type: Number, 
-      required: true, 
-      default: 0 
-    },
-    paidAt: { 
-      type: Date, 
-      default: Date.now 
-    }
+    type: { type: String, enum: ['cash', 'card', 'debt', 'balance'], required: true },
+    amount: { type: Number, required: true, default: 0 },
+    paidAt: { type: Date, default: Date.now }
   }],
 
-  surplusAmount: {
-    type: Number,
-    default : 0
-  }, // Ortiqcha summa (Mijozning depozitiga ketgan pul)
+  surplusAmount: { type: Number, default : 0 },
+  isDebtClosed: { type: Boolean, default: false },
 
-  isDebtClosed: {
-    type: Boolean,
-    default: false
-  },
-
-  // --- Bog'liqliklar ---
+  // --- Bog'liqliklar (Xodimlar va Mijoz) ---
   tableId: { type: Schema.Types.ObjectId, ref: 'Tabel', default: null },
-  staffId: { type: Schema.Types.ObjectId, ref: 'Employee', default: null },
-  customerId: { 
+  customerId: { type: Schema.Types.ObjectId, ref: 'Customer', default: null },
+
+  // 1. Buyurtmani kim yaratdi (Ofitsiant yoki Admin)
+  createdBy: { 
     type: Schema.Types.ObjectId, 
-    ref: 'Customer', 
-    default: null,
+    ref: 'User', 
+    required: true // Har doim kimdir yaratgan bo'lishi shart
   },
+
+  // 2. To'lovni kim qabul qildi (Kassir)
+  cashierId: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Employee', 
+    default: null // To'lov qilinmaguncha bo'sh bo'ladi
+  },
+
+  // Eski staffId ni o'rniga createdBy ishlatish tavsiya etiladi, 
+  // lekin hozircha saqlab qolishingiz ham mumkin.
+  staffId: { type: Schema.Types.ObjectId, ref: 'Employee', default: null },
 
   status: {
     type: String,
@@ -81,7 +75,7 @@ const CartSchema = new Schema({
   versionKey: false 
 });
 
-// Middleware: Agar qarz bo'lsa mijoz bo'lishi shartligini tekshirish (ixtiyoriy lekin tavsiya etiladi)
+// Middleware: Tekshiruvlar
 CartSchema.pre('save', function(next) {
   const hasDebt = this.payments.some(p => p.type === 'debt');
   const hasBalance = this.payments.some(p => p.type === 'balance');
@@ -89,6 +83,13 @@ CartSchema.pre('save', function(next) {
   if ((hasDebt || hasBalance) && !this.customerId) {
     return next(new Error("Qarz yoki Balans orqali to'lov uchun mijozni tanlash majburiy!"));
   }
+
+  // To'lov amalga oshirilganda (completed bo'lganda) cashierId borligini tekshirish (ixtiyoriy)
+  if (this.status === 'completed' && !this.cashierId) {
+    // Agar dasturda avtomatik yopilsa, bu xatolik berishi mumkin, 
+    // shuning uchun buni controller darajasida tekshirgan ma'qul.
+  }
+
   next();
 });
 
