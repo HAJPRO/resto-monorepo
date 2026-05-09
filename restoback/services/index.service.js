@@ -17,6 +17,7 @@ module.exports = {
   StatisticsService: require("./Dashboard/Sale/statistics.service.js"),
   CounterpartyService: require("./Counterparty/counterparty.service.js"),
   InsertService: require("./TMO/insert.service.js"),
-  CashService: require("./Cash/cash.service.js")
+  CashService: require("./Cash/cash.service.js"),
+  CheckTemplateService: require("./Check/check.service.js")
 
 };

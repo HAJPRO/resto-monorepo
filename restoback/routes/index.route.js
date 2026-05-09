@@ -17,6 +17,7 @@ module.exports = {
   CounterpartyRouter: require("./counterparty/counterparty.route.js"),
   StatisticsRouter: require("./dashboard/sale/statistics.route.js"),
   InsertRouter: require("./tmo/insert.route.js"),
-  CashRouter: require("./cash/cash.route.js")
+  CashRouter: require("./cash/cash.route.js"),
+  CheckTemplateRouter: require("./check/check.route.js")
  
 };

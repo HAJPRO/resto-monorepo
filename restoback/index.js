@@ -101,7 +101,8 @@ const {
   TransactionRouter,
   StatisticsRouter,
   CounterpartyRouter,InsertRouter,
-  CashRouter
+  CashRouter,
+ CheckTemplateRouter
 } = require("./routes/index.route");
 
 // Tenant yo'nalishlari (Dinamik bazaga ulanadigan route'lar)
@@ -135,6 +136,9 @@ tenantRouter.use("/insert", InsertRouter);
 
 // Cash
 tenantRouter.use("/cash", CashRouter);
+
+// Check Templates
+tenantRouter.use("/check-template", CheckTemplateRouter);
 
 // Tenant routerni asosiy app ga ulash
 app.use("/api/v1", tenantRouter);

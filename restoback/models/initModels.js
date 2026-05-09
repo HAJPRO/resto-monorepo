@@ -17,6 +17,7 @@ const ZoneSchema = require("../models/Zone/zone.model.js");
 const CounterpartySchema = require("../models/Counterparty/counterparty.model.js");
 const InsertSchema = require("./TMO/insert.model.js");
 const CashSchema = require("./Cash/cash.model.js");
+const CheckTemplateSchema = require("./Check/check.model.js");
 
 const initModels = (db) => {
     // Modelni bazadan olish yoki yaratish funksiyasi
@@ -41,7 +42,8 @@ const initModels = (db) => {
         Zone: getModel('Zone', ZoneSchema),
         Counterparty: getModel('Counterparty', CounterpartySchema),
         Insert: getModel('Insert', InsertSchema),
-        Cash: getModel('Cash', CashSchema)
+        Cash: getModel('Cash', CashSchema),
+        CheckTemplate: getModel('CheckTemplate', CheckTemplateSchema)
        
     };
 };

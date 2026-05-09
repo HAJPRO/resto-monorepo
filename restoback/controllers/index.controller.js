@@ -17,6 +17,7 @@ module.exports = {
   StatisticsController: require("./Dashboard/Sale/statistics.controller.js"),
   CounterpartyController: require("./Counterparty/counterparty.controller.js"),
   InsertController: require("./TMO/insert.controller.js"),
-  CashController: require("./Cash/cash.controller.js")
+  CashController: require("./Cash/cash.controller.js"),
+  CheckTemplateController: require("./Check/check.controller.js")
   
 };
