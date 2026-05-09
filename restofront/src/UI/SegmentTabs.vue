@@ -1,22 +1,20 @@
 <template>
-  <div class="w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80  backdrop-blur-md rounded-2xl">
-    <div ref="scrollContainer" class="flex overflow-x-auto no-scrollbar py-1 px-4 sm:justify-center">
+  <div class="w-full sticky top-0 z-40 bg-white/50 dark:bg-slate-950/80 backdrop-blur-md rounded-2xl ml-1 mr-1">
+    <div ref="scrollContainer" class="flex overflow-x-auto no-scrollbar py-1 px-4 justify-center">
       
-      <div ref="container" class="relative flex p-1 bg-slate-100/50 dark:bg-white/5 rounded-full min-w-max sm:min-w-[400px]">
+      <div ref="container" class="relative flex p-1 bg-slate-100/50 dark:bg-white/5 rounded-full w-full max-w-max sm:min-w-[400px]">
         
-        <!-- Sliding Indicator (Faqat silliq oq fon) -->
         <div 
           class="absolute top-1 bottom-1 left-0 bg-white dark:bg-slate-800 rounded-full shadow-[0_2px_5px_rgba(0,0,0,0.05)] transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] z-0"
           :style="indicatorStyle"
         ></div>
 
-        <!-- Tab Tugmalari -->
         <button 
           v-for="(tab, index) in tabs" 
           :key="tab.id"
           :ref="el => { if (el) tabRefs[index] = el }"
           @click="selectTab(tab, index)"
-          class="relative z-10 flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-full transition-all duration-200 outline-none select-none"
+          class="relative z-10 flex-1 flex items-center text-center justify-center gap-2 py-2 px-6 rounded-full transition-all duration-200 outline-none select-none whitespace-nowrap"
           :class="isActive(tab) ? 'text-slate-900 dark:text-white' : 'text-slate-400'"
         >
           <i v-if="tab.icon" :class="[tab.icon, 'text-xs']"></i>
