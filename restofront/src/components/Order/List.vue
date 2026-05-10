@@ -188,7 +188,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { IonPage, IonContent, IonInfiniteScroll, IonInfiniteScrollContent } from "@ionic/vue";
-import { OrderStore, TabelStore } from "../../stores/index.store";
+import { OrderStore, TabelStore,PrinterStore } from "../../stores/index.store";
 import { storeToRefs } from "pinia";
 import { Button, Header, GlobalRefresher, EmptyState, LoadingState, DateRangePicker } from "../../UI/UI";
 import Footer from "../../partials/Footer.vue";
@@ -197,6 +197,7 @@ import PaymentModal from "../Tabel/PaymentModal.vue";
 
 const store_order = OrderStore();
 const store_tabel = TabelStore();
+const store_printer = PrinterStore();
 const { orders, loading } = storeToRefs(store_order);
 
 const searchQuery = ref("");
@@ -278,7 +279,10 @@ const orderCounts = computed(() => ({
 }));
 
 const formatDate = (d) => d ? new Date(d).toLocaleString('uz-UZ', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }) : '';
-const handlePrint = (o) => console.log("Printing:", o._id);
+const handlePrint = (order) => {
+  console.log(order)
+  store_printer.handlePrint(order);
+};
 
 onMounted(() => store_order.GetAll(true));
 </script>

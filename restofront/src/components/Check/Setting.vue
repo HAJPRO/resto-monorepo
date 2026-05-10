@@ -3,16 +3,21 @@
     <div class="min-h-screen bg-slate-50 dark:bg-[#020617] flex flex-col">
       <Header title="Chek sozlamalari" v-model="searchQuery" class="no-print" />
 
-      <div class="sticky top-0 z-30 bg-slate-50/80 dark:bg-[#020617]/80 backdrop-blur-md pb-2 pt-1 no-print">
+      <div class="sticky top-0 z-30 bg-transparent backdrop-blur-sm border-b border-slate-200 dark:border-white/10">
         <SegmentTabs :tabs="Tabs" v-model="activeTab" />
       </div>
 
       <ion-content :fullscreen="true">
         <div class="p-4 pb-44 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div v-if="activeTab === 'templates'" class="lg:col-span-8">
+          <div v-if="activeTab === 'templates'" class="col-span-12 animate__animated animate__fadeIn">
   <TemplateList @edit="activeTab = 'sozlamalar'" @add-new="clearAndNew" />
+            
 </div>
-          <div v-if="activeTab === 'sozlamalar'" class="lg:col-span-8 space-y-6 animate__animated animate__fadeIn">
+<div v-if="activeTab === 'printer'" class="col-span-12 animate__animated animate__fadeIn">
+            <PrinterList />
+          </div>
+
+          <div v-if="activeTab === 'sozlamalar'" class="col-span-12 space-y-6 animate__animated animate__fadeIn">
             
             <section class="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-white/5 shadow-sm">
               <h3 class="text-xs font-black uppercase text-blue-500 mb-6 flex items-center gap-2">
@@ -136,8 +141,8 @@ Tozalash
             </Button>
             </div>
           </div>
-
-          <div :class="['lg:col-span-4 flex justify-center items-start sticky top-24', activeTab === 'preview' ? 'flex animate__animated animate__zoomIn' : 'hidden lg:flex']">
+ 
+          <div v-if="activeTab === 'preview'" class="lg:col-span-12 flex justify-center items-start sticky top-24">
             <div id="printable-receipt" :style="{ width: config.paperWidth + 'mm' }" 
                  class="bg-white p-5 text-black font-mono text-[10px] shadow-2xl receipt-print min-h-[500px] border-t-8 border-indigo-500">
               
@@ -201,7 +206,7 @@ Tozalash
         </div>
       </ion-content>
 
-      <footer v-if="activeTab === 'preview' || isLargeScreen" class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-slate-50 dark:from-[#020617] no-print">
+      <footer v-if="activeTab === 'preview'" class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-slate-50 dark:from-[#020617] no-print">
         <div class="max-w-6xl mx-auto flex gap-4">
            <Button @click="activeTab = 'sozlamalar'" leftIcon="fas fa-edit" class="lg:hidden flex-1 h-14 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl font-black uppercase">
             Tahrirlash
@@ -227,6 +232,8 @@ import {
 } from "@ionic/vue";
 import { Input, Select, Upload, Header, SegmentTabs,Button } from "../../UI/UI";
 import TemplateList from "./TemplateList.vue";
+import PrinterList from "./Printer.vue";
+
 import { CheckTemplateStore } from "../../stores/index.store"; // To'g'ri pathni kiriting
 
 // STORE BOG'LASH
@@ -241,7 +248,8 @@ const isLargeScreen = ref(window.innerWidth >= 1024);
 const Tabs = [
   { id: 'sozlamalar', label: 'Konstruktor', icon: 'fas fa-tools' },
   { id: 'preview', label: 'Chekni ko\'rish', icon: 'fas fa-eye' },
-  { id: 'templates', label: 'Shablonlar', icon: 'fas fa-folder' }
+  { id: 'templates', label: 'Shablonlar', icon: 'fas fa-folder' },
+  { id: 'printer', label: 'Printerga ulash', icon: 'fas fa-print' }
 ];
 
 const persons = [

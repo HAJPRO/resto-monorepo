@@ -19,3 +19,4 @@ export { InsertStore } from './TMO/Insert/insert.store';
 export { CounterpartyStore } from './Counterparty/counterparty.store';
 export { CashStore } from './Cash/cash.store';
 export { CheckTemplateStore } from './Check/check.store';
+export { PrinterStore } from './Check/printer.store';   
