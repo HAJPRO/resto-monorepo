@@ -74,7 +74,7 @@
     <div v-if="table.cartId" class="space-y-1">
       <div v-if="table.cartId.staffId" class="flex items-center gap-1.5">
         <div :class="['w-4 h-4 rounded-full flex items-center justify-center text-[7px] bg-white/30 shadow-sm', getStatusTheme(table).text]">
-          <i class="fas fa-user-tie"></i>
+          <i class="fas fa-bell-concierge fa-xl"></i>
         </div>
         <span :class="['text-[11px] font-bold tracking-tight truncate max-w-[100px]', getStatusTheme(table).text]">
           {{ table.cartId.staffId.firstname }}
@@ -83,7 +83,7 @@
 
       <div v-if="table.cartId.customerId" class="flex items-center gap-1.5">
         <div class="w-4 h-4 rounded-full flex items-center justify-center text-[7px] bg-emerald-500/10 text-emerald-600 shadow-sm">
-          <i class="fas fa-user"></i>
+          <i class="fas fa-user-tie fa-xl"></i>
         </div>
         <span class="text-[11px] font-black text-slate-700 dark:text-slate-200 truncate max-w-[100px]">
           {{ table.cartId.customerId.name }}
@@ -169,7 +169,7 @@
         <span class="text-[10px] font-bold">{{ table.capacity || 4 }}</span>
       </div>
     </div>
-
+<Guard :roles="['1000', '2000']" mode="hide">
     <button 
   @click="store.PaymentModalAction(table)"
   class="relative flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 shadow-sm active:scale-90 transition-all duration-200 group"
@@ -179,6 +179,7 @@
   
   <div class="absolute inset-0 bg-slate-100 dark:bg-white/5 opacity-0 group-active:opacity-100 rounded-2xl transition-opacity"></div>
 </button>
+</Guard>
   </div>
 </div>
         </div>

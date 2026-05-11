@@ -280,7 +280,6 @@ const orderCounts = computed(() => ({
 
 const formatDate = (d) => d ? new Date(d).toLocaleString('uz-UZ', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }) : '';
 const handlePrint = (order) => {
-  console.log(order)
   store_printer.handlePrint(order);
 };
 

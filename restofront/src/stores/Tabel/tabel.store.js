@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useToast } from "../../UI/utils/useToast"; // To'g'ri yo'l ekanligini tekshiring
 import { TabelService,OrderService } from "../../ApiService/index.service";
-import { CashStore } from "../index.store";
+import { CashStore,PrinterStore } from "../index.store";
 import router from '../../router/index';
 export const TabelStore = defineStore('TabelStore', {
   state: () => ({
@@ -82,8 +82,6 @@ export const TabelStore = defineStore('TabelStore', {
     },
 //Payment Modal
   PaymentModalAction(table) {
-    console.log(table);
-    
     this.activeTable = table.tableId ? table.tableId : table ;
     const cart = table.cartId  ? table.cartId : table;
 
@@ -105,6 +103,8 @@ export const TabelStore = defineStore('TabelStore', {
   },
 
  async SubmitPayment() {
+       const printStore = PrinterStore();
+
   const p = this.model_payment;
   const cart = this.activeTable?.cartId || this.activeTable;
   const { toast } = useToast();
@@ -113,6 +113,7 @@ export const TabelStore = defineStore('TabelStore', {
     toast.warning("Buyurtma topilmadi");
     return;
   }
+  await printStore.handlePrint(cart);
 
   // Jami real to'lov (debt bu yerga kirmaydi)
   const totalPaid = 

@@ -32,12 +32,6 @@ export const formatRow = (left, right, width = 32) => {
   return l + " ".repeat(Math.max(0, spaceCount)) + r;
 };
 
-// ... COMMANDS va clean funksiyalari o'zgarishsiz qoladi ...
-
-
-
-
-
 
 
 export const generatePrintContent = (order, template) => {
@@ -50,28 +44,39 @@ export const generatePrintContent = (order, template) => {
   // 1. KORXONA MA'LUMOTLARI (PROFESSIONAL HEADER)
 c += COMMANDS.CENTER;
 
-// Kompaniya nomi - Eng asosiy urg'u
 if (template.companyName) {
-  c += COMMANDS.BOLD_ON + COMMANDS.DOUBLE_SIZE; // Nomi biroz kattaroq va qalin
+  // Kompaniya nomi - Maksimal urg'u
+  c += COMMANDS.BOLD_ON + COMMANDS.DOUBLE_SIZE;
   c += `${clean(template.companyName).toUpperCase()}\n`;
-  c += COMMANDS.NORMAL_SIZE + COMMANDS.BOLD_OFF; // Keyingi qatorlar uchun normallashtirish
+  c += COMMANDS.NORMAL_SIZE + COMMANDS.BOLD_OFF;
 }
 
-// Manzil - Kichikroq va toza
-if (template.showLogo && template.address) {
-  c += `${clean(template.address)}\n`;
-}
+// Manzil va Kontaktlarni mantiqiy bloklarga ajratamiz
+if (template.showLogo) {
+  c += "\n"; // Nomdan keyin kichik bo'shliq
 
-// Aloqa ma'lumotlari (Telefon va Ijtimoiy tarmoqlar)
-if (template.showLogo && template.phone) {
-  c += `Tel: ${template.phone}\n`;
-}
+  if (template.address) {
+    // Manzilni biroz ajratib ko'rsatish
+    c += `Manzil:${clean(template.address)}\n`;
+  }
 
-// Ijtimoiy tarmoqlar (Telegram, Instagram va h.k.)
-if (template.showLogo && template.socials) {
-  c += `${clean(template.socials).toLowerCase()}\n`;
+  // Kontaktlar bloki
+  if (template.phone || template.socials) {
+    let contactLine = "";
+    
+    if (template.phone) contactLine += `Tel: ${template.phone}`;
+    
+    // Agar telefon ham, ijtimoiy tarmoq ham bo'lsa, ularni ajratib yozamiz
+    if (template.phone && template.socials) {
+      c += `${contactLine}\n`;
+      c += `${clean(template.socials).toLowerCase()}\n`;
+    } else {
+      c += `Telegram:${contactLine}${clean(template.socials).toLowerCase()}\n`;
+    }
+  }
 }
-
+// Header tugaganini bildiruvchi chiroyli chiziq
+c += "\n"; // Footer matni yopishib qolmasligi uchun
 c += separator; // Chiroyli ajratuvchi chiziq
 
   // 2. BUYURTMA INFO (Yuborgan obyektga moslandi)
@@ -86,10 +91,20 @@ c += separator; // Chiroyli ajratuvchi chiziq
   }
 
   // Mijoz (Sizda customerId.name)
-  if (template.showCustomer && order.customerId?.name) {
+if (template.showCustomer && order.customerId?.name) {
     c += `MIJOZ: ${clean(order.customerId.name)}\n`;
-    c += `Balans: ${clean(order.customerId.balance?.toString() || '0')}\n`;
-  }
+
+    // Balansni formatlash (Masalan: 1 250 000 so'm)
+    const balanceValue = Number(order.customerId.balance || 0);
+    const formattedBalance = balanceValue.toLocaleString('ru-RU'); // 1 000 000 ko'rinishiga keltiradi
+    const currency = template.currency || "so'm";
+
+    // Balans holatiga qarab belgi qo'yish (ixtiyoriy)
+    const label = balanceValue < 0 ? "QARZDORLIK:" : "BALANS:";
+    
+    // Natija: BALANS: 50 000 so'm
+    c += `${label} ${formattedBalance} ${currency}\n`;
+}
   
   // Sana (createdAt dan olinadi)
   const date = order.createdAt ? new Date(order.createdAt) : new Date();
@@ -170,21 +185,32 @@ c += separator; // Chiroyli ajratuvchi chiziq
   }
 
   // 6. FISKAL VA QR
-  c += COMMANDS.CENTER;
-  if (template.showFiscal) {
-    c += "FISKAL CHEK\n";
-    if (order._id) c += `ID: ${order._id.substring(order._id.length - 8)}\n`;
-  } else {
-    c += "FISKAL CHEK EMAS\n";
-  }
+  // c += COMMANDS.CENTER;
+  // if (template.showFiscal) {
+  //   c += "FISKAL CHEK\n";
+  //   if (order._id) c += `ID: ${order._id.substring(order._id.length - 8)}\n`;
+  // } else {
+  //   c += "FISKAL CHEK EMAS\n";
+  // }
 
-  if (template.footerText) {
-    c += `\n${clean(template.footerText)}\n`;
-  }
+// 7. FOOTER (MARKAZDA VA CHIROYLI)
+  c += COMMANDS.CENTER; // Printer darajasida markazlash
   
+  // if (template.footerText) {
+  //   c += `${clean(template.footerText)}\n`;
+  //   c += separator;
+  // }
+
+  c += "\n";
+  c += COMMANDS.BOLD_ON;
+  c += "TASHRIFINGIZ UCHUN RAHMAT!\n";
+  c += "YANA KUTIB QOLAMIZ!\n";
+  c += COMMANDS.BOLD_OFF;
+
   // 7. FINISH
-  c += "YANA KUTAMIZ!\n";
-  c += "\n\n\n\n" + COMMANDS.CUT;
-  
+  c += COMMANDS.LEFT; // Kesishdan oldin holatni tiklash
+  c += "\n".repeat(4); 
+  c += COMMANDS.CUT;
+
   return c;
 };

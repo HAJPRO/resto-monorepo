@@ -1,10 +1,11 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { TabelStore } from "../../stores/index.store"; 
+import { TabelStore, PrinterStore } from "../../stores/index.store"; 
 import { Button, Modal } from "../../UI/UI"; // Keyboard olib tashlandi
 
 const store_tabel = TabelStore();
+const store_printer = PrinterStore();
 const { isPaymentModal, model_payment, activeTable } = storeToRefs(store_tabel);
 
 // Rejimlar boshqaruvi

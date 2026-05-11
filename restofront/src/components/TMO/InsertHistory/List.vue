@@ -135,7 +135,7 @@
                 <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Jami Kirim Summasi</p>
                 <div class="flex items-baseline gap-1">
                   <span class="text-2xl font-black dark:text-white tracking-tighter text-emerald-600">
-                    {{ (insert.paidAmount || 0).toLocaleString() }}
+                    {{ (insert.totalCostAmount || 0).toLocaleString() }}
                   </span>
                   <span class="text-[10px] font-black text-slate-400 uppercase">UZS</span>
                 </div>
