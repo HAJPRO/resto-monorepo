@@ -34,10 +34,7 @@ export const OrderStore = defineStore('OrderStore', {
       }
     },
 
-    /**
-     * @param {Boolean} isRefresh - Ro'yxatni boshidan yuklash (true) yoki davom ettirish (false)
-     * @param {Object|String} filter - 'Kun', 'Hafta' yoki {start: '...', end: '...'}
-     */
+   
 async GetAll(isRefresh = true, filter = null) {
       if (this.loading) return;
       this.loading = true;

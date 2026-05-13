@@ -2,7 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { TabelStore, PrinterStore } from "../../stores/index.store"; 
-import { Button, Modal } from "../../UI/UI"; // Keyboard olib tashlandi
+import { Button, Modal } from "../../UI/UI";
 
 const store_tabel = TabelStore();
 const store_printer = PrinterStore();
@@ -15,7 +15,7 @@ const selectedMethod = ref('cash');
 // --- PRICE FORMATTING & CALCULATIONS ---
 const formatPrice = (v) => new Intl.NumberFormat('uz-UZ').format(v || 0) + " so'm";
 
-const cart = computed(() => activeTable.value?.cartId ? activeTable.value?.cartId : activeTable.value  || {});
+const cart = computed(() => activeTable.value?.cartId ? activeTable.value?.cartId : activeTable.value || {});
 const grandTotal = computed(() => cart.value.finalTotal || 0);
 const customerBalance = computed(() => cart.value?.customerId?.balance || 0);
 
@@ -73,7 +73,7 @@ const onFinish = async () => {
     <div class="bg-slate-50 dark:bg-slate-950 rounded-xl p-4 space-y-5 pb-12">
       
       <div class="grid grid-cols-2 gap-3">
-        <div class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all group">
+        <div class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all">
           <div class="relative shrink-0">
             <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-200/50 dark:border-white/10">
               <i class="fa-solid fa-user-gear text-indigo-500/80 text-sm"></i>
@@ -81,59 +81,39 @@ const onFinish = async () => {
             <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></div>
           </div>
           <div class="flex flex-col min-w-0 flex-1">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
-                {{ cart?.staffId?.firstname || 'Admin' }}
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <div class="flex items-center justify-center px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10">
-                <i class="fa-solid fa-shield-halved text-[7px] text-indigo-500 mr-1"></i>
-                <span class="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">
-                  Xizmatda
-                </span>
-              </div>
+            <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
+              {{ cart?.staffId?.firstname || 'Admin' }}
+            </span>
+            <div class="flex items-center justify-center w-max px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 mt-0.5">
+              <span class="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">Xizmatda</span>
             </div>
           </div>
         </div>
 
-        <div v-if="cart?.customerId" class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5 transition-all group">
+        <div v-if="cart?.customerId" class="flex items-center gap-3 p-2 bg-slate-100/50 dark:bg-white/5 rounded-2xl border border-slate-200/50 dark:border-white/5">
           <div class="relative shrink-0">
-            <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-200/50 dark:border-white/10 group-hover:scale-105 transition-transform duration-300">
+            <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-200/50 dark:border-white/10">
               <i class="fa-solid fa-user-tie text-slate-600 dark:text-slate-300 text-sm"></i>
             </div>
-            <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
           </div>
           <div class="flex flex-col min-w-0 flex-1">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
-                {{ cart?.customerId?.name }}
-              </span>
-              <span class="text-[7px] font-black bg-amber-100 dark:bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded-md uppercase tracking-tighter">
-                {{ cart?.customerId?.status }}
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <div class="flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 dark:bg-white/10">
-                <i class="fa-solid fa-wallet text-[8px]" 
-                   :class="customerBalance < 0 ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'"></i>
-              </div>
-              <span class="text-[10px] font-bold tracking-tight leading-none"
-                    :class="customerBalance < 0 ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'">
-                {{ formatPrice(customerBalance) }}
-              </span>
-            </div>
+            <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 truncate tracking-tight uppercase">
+              {{ cart?.customerId?.name }}
+            </span>
+            <span class="text-[10px] font-bold tracking-tight mt-0.5" :class="customerBalance < 0 ? 'text-rose-500' : 'text-emerald-500'">
+              {{ formatPrice(customerBalance) }}
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="relative overflow-hidden bg-slate-900 dark:bg-indigo-600 rounded-[40px] p-8 shadow-2xl group transition-all duration-500">
+      <div class="relative overflow-hidden bg-slate-900 dark:bg-indigo-600 rounded-[40px] p-7 shadow-2xl group transition-all duration-500">
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
-        <div class="relative z-10 flex flex-col gap-4">
+        <div class="relative z-10 space-y-4">
           <div class="flex justify-between items-start">
             <div class="space-y-1">
-              <p class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">To'lov summasi</p>
-              <h2 class="text-4xl font-black text-white tracking-tighter">
+              <p class="text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">Jami to'lov</p>
+              <h2 class="4xl:text-lg md:lg font-black text-white tracking-tighter italic">
                 {{ formatPrice(grandTotal) }}
               </h2>
             </div>
@@ -141,9 +121,20 @@ const onFinish = async () => {
               <i class="fa-solid fa-receipt text-xl text-white"></i>
             </div>
           </div>
-          <div class="flex gap-4 pt-4 border-t border-white/10 text-[9px] font-black text-white/60 uppercase tracking-widest">
-            <span>Taom: {{ formatPrice(cart.subtotal) }}</span>
-            <span v-if="cart.serviceFeeAmount > 0">Xizmat: +{{ cart.serviceFeePercent }}%</span>
+          
+          <div class="flex justify-between gap-4 pt-4 border-t border-white/10">
+            <div class="flex flex-col">
+              <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Xizmat ({{ cart.serviceFeePercent }}%)</span>
+              <span class="text-[11px] font-bold text-indigo-200">+{{ formatPrice(cart.serviceFeeAmount) }}</span>
+            </div>
+            <div class="flex flex-col text-center">
+              <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Chegirma ({{ cart.discountPercent }}%)</span>
+              <span class="text-[11px] font-bold text-rose-300">-{{ formatPrice(cart.discountAmount) }}</span>
+            </div>
+            <div class="flex flex-col text-right">
+              <span class="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Buyurtma</span>
+              <span class="text-[11px] font-bold text-white">{{ formatPrice(cart.subtotal) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -181,9 +172,9 @@ const onFinish = async () => {
                   'fa-wallet': key==='balance'
                 }"></i>
               </div>
-              <div class="flex flex-col items-start">
+              <div class="flex flex-col items-start text-left">
                 <span class="text-xs font-black uppercase tracking-wider">{{ val }}</span>
-                <span v-if="key === 'balance'" class="text-[9px] opacity-70">{{ formatPrice(customerBalance) }} mavjud</span>
+                <span v-if="key === 'balance'" class="text-[9px] opacity-70 italic">{{ formatPrice(customerBalance) }} mavjud</span>
               </div>
             </div>
             <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
@@ -195,14 +186,14 @@ const onFinish = async () => {
 
         <div v-if="activeTab === 'mixed'" class="flex flex-col gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div v-for="f in [
-            {k:'cash', l:'Naqd Pul', i:'fa-money-bill-1', desc: 'Kassaga naqd qabul qilish'}, 
-            {k:'card', l:'Plastik Karta', i:'fa-credit-card', desc: 'Humo / UzCard orqali'}, 
-            {k:'terminal', l:'Terminal', i:'fa-print', desc: 'Bank terminali orqali'}, 
-            {k:'debt', l:'Nasiya (Qarz)', i:'fa-clock', desc: 'Mijoz hisobiga qarz yozish'},
-            {k:'balance', l:'Mijoz Balansi', i:'fa-vault', desc: 'Mijozning ichki hamyonidan'}
+            {k:'cash', l:'Naqd Pul', i:'fa-money-bill-1', desc: 'Kassaga naqd pul'}, 
+            {k:'card', l:'Plastik Karta', i:'fa-credit-card', desc: 'Humo / UzCard'}, 
+            {k:'terminal', l:'Terminal', i:'fa-print', desc: 'Bank terminali'}, 
+            {k:'balance', l:'Mijoz Balansi', i:'fa-vault', desc: 'Ichki hamyondan'},
+            {k:'debt', l:'Nasiya (Qarz)', i:'fa-clock', desc: 'Mijoz hisobiga qarz'}
           ]" :key="f.k" 
             v-show="f.k !== 'balance' || customerBalance > 0"
-            class="relative overflow-hidden p-4 rounded-[26px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 transition-all duration-300 group"
+            class="relative p-4 rounded-[26px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 transition-all duration-300"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
@@ -210,23 +201,17 @@ const onFinish = async () => {
                   <i class="fa-solid text-lg" :class="f.i"></i>
                 </div>
                 <div class="flex flex-col">
-                  <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                    {{ f.l }}
-                  </label>
-                  <span class="text-[9px] text-slate-400 font-medium tracking-tight">
-                    {{ f.k === 'balance' ? `Mavjud: ${formatPrice(customerBalance)}` : f.desc }}
-                  </span>
+                  <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider">{{ f.l }}</label>
+                  <span class="text-[9px] text-emerald-500 font-bold" v-if="f.k === 'balance'">{{ formatPrice(customerBalance) }}</span>
+                  <span class="text-[9px] text-slate-400 font-medium" v-else>{{ f.desc }}</span>
                 </div>
               </div>
-
-              <div class="flex flex-col items-end">
-                <input 
-                  type="number" 
-                  v-model.number="model_payment[f.k]"
-                  class="w-32 bg-transparent text-right text-lg font-black tracking-tighter text-slate-900 dark:text-white focus:outline-none placeholder-slate-300"
-                  placeholder="0"
-                />
-              </div>
+              <input 
+                type="number" 
+                v-model.number="model_payment[f.k]"
+                class="w-32 bg-transparent text-right text-lg font-black tracking-tighter text-slate-900 dark:text-white focus:outline-none placeholder-slate-300"
+                placeholder="0"
+              />
             </div>
           </div>
         </div>
@@ -240,12 +225,11 @@ const onFinish = async () => {
                :class="remaining <= 0 ? 'bg-emerald-500 border-emerald-500 text-white rotate-[360deg]' : 'bg-white dark:bg-slate-900 border-slate-100 text-slate-300'">
             <i class="fa-solid" :class="remaining <= 0 ? 'fa-check text-lg' : 'fa-spinner fa-spin text-sm'"></i>
           </div>
-
           <div class="flex flex-col">
-            <span class="text-[10px] font-black  tracking-[0.1em]" :class="surplus > 0 ? 'text-emerald-500' : 'text-slate-400'">
+            <span class="text-[10px] font-black tracking-[0.1em]" :class="surplus > 0 ? 'text-emerald-500' : 'text-slate-400'">
               {{ surplus > 0 ? "Balansga o'tadi" : "To'lov qoldig'i" }}
             </span>
-            <span class="text-sm font-black tracking-tighter" :class="surplus > 0 ? 'text-emerald-600' : 'text-slate-900 dark:text-white'">
+            <span class="text-sm font-black tracking-tighter italic" :class="surplus > 0 ? 'text-emerald-600' : 'text-slate-900 dark:text-white'">
               {{ surplus > 0 ? `+ ${formatPrice(surplus)}` : formatPrice(remaining) }}
             </span>
           </div>
@@ -255,12 +239,11 @@ const onFinish = async () => {
           @click="onFinish"
           size="small"
           :variant="isReady ? 'primary' : 'disabled'"
+          class="!rounded-2xl"
           :class="isReady ? 'shadow-2xl shadow-indigo-500/40 scale-105 active:scale-95' : 'opacity-30'"
         >
-          <div class="flex items-center gap-3">
-            <span class="font-black uppercase tracking-widest text-xs">
-              {{ isReady ? `To'lov` : 'Kutilmoqda' }}
-            </span>
+          <div class="flex items-center gap-3 px-2">
+            <span class="font-black uppercase tracking-widest text-xs">Yakunlash</span>
             <i v-if="isReady" class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
           </div>
         </Button>
@@ -270,19 +253,7 @@ const onFinish = async () => {
 </template>
 
 <style scoped>
-.animate-in {
-  animation-delay: 0.1s;
-}
-
-/* Chrome, Safari, Edge, Opera uchun input spinnerni olib tashlash */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox uchun input spinnerni olib tashlash */
-input[type=number] {
-  -moz-appearance: textfield;
-}
+.animate-in { animation-delay: 0.1s; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 </style>

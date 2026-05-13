@@ -1,72 +1,72 @@
 import { PrinterStore } from "../../stores/index.store";
-import { generatePrintContent } from "../index.util";
+import { generatePrintContent, generateKitchenContent } from "../index.util";
 import { BleClient, numbersToDataView } from '@capacitor-community/bluetooth-le';
 import { UsbSerial } from 'capacitor-usb-serial';
 import { useToast } from "../../UI/utils/useToast";
 
-// Standart printer UUID lari
+/**
+ * Ko'p uchraydigan Generic Printer UUID lari. 
+ * Agar ulanmasa, printeringizning texnik hujjatidan buni tekshirish kerak.
+ */
 export const PRINTER_SERVICE_UUID = "000018f0-0000-1000-8000-00805f9b34fb";
 const PRINTER_CHARACTERISTIC_UUID = "00002af1-0000-1000-8000-00805f9b34fb";
 
-export const printReceipt = async (orderData, activeTemplate) => {
-  const pStore = PrinterStore();
+export const printReceipt = async (orderData, activeTemplate, printerData) => {
   const { toast } = useToast();
-  const printer = pStore.connectedPrinter;
 
-  if (!printer) {
-    toast.error("Printer ulanmagan! Sozlamalardan printerni ulang.");
-    return false;
-  }
-
+  if (!printerData) return false;
   if (!activeTemplate) {
     toast.error("Faol shablon topilmadi!");
     return false;
   }
 
   try {
-    const content = generatePrintContent(orderData, activeTemplate);
-    
-    /**
-     * MUHIM: Xitoycha yozuvlarni yo'qotish uchun UTF-8 dan voz kechamiz.
-     * Matnni 8-bitli ASCII/Latin formatiga o'tkazamiz.
-     */
+    // 1. SMART CONTENT SELECTION (Role based)
+    let content = "";
+    // Faqat 'kitchen' emas, 'bar' yoki boshqa ishlab chiqarish rollari uchun ham KitchenContent ishlatamiz
+    if (['kitchen', 'bar'].includes(printerData.role)) {
+      content = generateKitchenContent(orderData, activeTemplate);
+    } else {
+      content = generatePrintContent(orderData, activeTemplate);
+    }
+
+    // 2. BINARY ENCODING
     const data = new Uint8Array(content.length);
     for (let i = 0; i < content.length; i++) {
-      // Har bir belgini 0-255 oralig'idagi baytga aylantiramiz
       data[i] = content.charCodeAt(i) & 0xFF;
     }
 
-    if (printer.type === 'bluetooth') {
-      /**
-       * CHUNKING LOGIC: 512 bayt limitidan oshmaslik uchun 
-       * va printerni qizib ketishidan saqlash uchun bo'laklab yuboramiz.
-       */
-      const chunkSize = 100; 
+    // 3. BLUETOOTH PRINTING
+    if (printerData.type === 'bluetooth') {
+      const chunkSize = 120;
       for (let i = 0; i < data.length; i += chunkSize) {
         const chunk = data.slice(i, i + chunkSize);
-        
         await BleClient.write(
-          printer.id,
+          printerData.id,
           PRINTER_SERVICE_UUID,
           PRINTER_CHARACTERISTIC_UUID,
           numbersToDataView(Array.from(chunk))
         );
-        
-        // Printer protsessoriga nafas olish uchun vaqt (15ms)
-        await new Promise(resolve => setTimeout(resolve, 15));
+        await new Promise(r => setTimeout(r, 25));
       }
     } 
-    else if (printer.type === 'usb') {
-      // USB orqali yuborishda matn ko'rinishida yuboramiz
+    
+    // 4. USB PRINTING
+    else if (printerData.type === 'usb') {
       await UsbSerial.write({ data: content });
     }
 
-    toast.success("Chek chop etishga yuborildi");
-    return true;
+    // 5. WIFI/NETWORK PRINTING
+    else if (printerData.type === 'wifi') {
+      // Network printerlar uchun HTTP yoki TCP request (printer IP-siga qarab)
+      // Bu yerda sizning backend yoki printer bridge'ingizga qarab fetch ishlatish mumkin
+      console.log(`WIFI printing to ${printerData.id}`);
+      // Masalan: await fetch(`http://${printerData.id}/print`, { method: 'POST', body: content });
+    }
 
+    return true;
   } catch (error) {
-    console.error("Print Error:", error);
-    toast.error("Chop etishda xatolik: " + error.message);
+    console.error(`Print Error (${printerData.name}):`, error);
     return false;
   }
 };

@@ -6,9 +6,8 @@ import { jwtDecode } from 'jwt-decode';
 
 export const MenuStore = defineStore('MenuStore', {
   state: () => ({
-    
     model: { _id: null }, 
-    cartItems: [], // Savatdagi mahsulotlar
+    cartItems: [], 
     isCartOpen: false,
     loading: false,
     
@@ -38,7 +37,6 @@ export const MenuStore = defineStore('MenuStore', {
   }),
 
   getters: {
-    // Foydalanuvchi ID sini har safar yangi olish
     getUserId: () => {
       const token = localStorage.getItem("token");
       if (!token) return null;
@@ -47,35 +45,28 @@ export const MenuStore = defineStore('MenuStore', {
         return decoded.id || decoded._id;
       } catch (e) { return null; }
     },
-    // Savatdagi jami elementlar soni
+
+    // Savatdagi jami mahsulotlar soni (porsiyalar yig'indisi)
     totalItemsCount: (state) => state.cartItems.reduce((sum, item) => sum + item.cartQuantity, 0),
     
-    // Asosiy summa (chegirma va xizmat haqsiz)
+    // Asosiy summa (har bir itemning o'z narxi bo'yicha)
     currentSubtotal: (state) => state.cartItems.reduce((sum, item) => sum + (item.price * item.cartQuantity), 0),
     
-    // Xizmat haqini hisoblash
     calculateServiceFee: (state) => {
       const feeStore = FeeStore();
       const percentage = feeStore.model?.status === 'active' ? feeStore.model?.percentage : 0; 
-      if (state.isServiceActive) {
-        return (state.currentSubtotal * percentage) / 100;
-      }
-      return 0;
+      return state.isServiceActive ? (state.currentSubtotal * percentage) / 100 : 0;
     },
     
-    // Chegirma summasini hisoblash
     calculateDiscountAmount: (state) => {
-      const subtotal = state.currentSubtotal || 0;
       const percent = Number(state.discountPercent) || 0;
-      return (subtotal * percent) / 100;
+      return (state.currentSubtotal * percent) / 100;
     },
     
-    // Yakuniy jami summa
     finalTotal: (state) => {
       return (state.currentSubtotal + state.calculateServiceFee) - state.calculateDiscountAmount;
     },
     
-    // Buyurtma berishga tayyorligini tekshirish
     isReadyToOrder: (state) => {
       const hasItems = state.cartItems.length > 0;
       const hasStaff = !!state.selectedStaff;
@@ -85,113 +76,94 @@ export const MenuStore = defineStore('MenuStore', {
   },
 
   actions: {
-    // --- UI ACTIONS ---
     async ModalAction(payload) {
       this.modalAction = payload?.action;
       if (payload?.action === 'edit' && payload.id) {
         const foundItem = this.menus.find(item => item._id === payload.id);
-        if (foundItem) {
-          this.model = JSON.parse(JSON.stringify(foundItem));
-        }
+        if (foundItem) this.model = JSON.parse(JSON.stringify(foundItem));
       } else {
         this.model = { _id: null };
       }
       this.isModal = !this.isModal;
     },
-    async Create(payload) {
+
+    // --- CART ACTIONS (UNIQUE ID LOGIKASI BILAN) ---
+    addToCart(payload) {
       const { toast } = useToast();
-      try {
-        if(payload.action === 'create'){
-          const data = await MenuService.Create(payload);
-          toast.success(data.msg);
-        }
-      } catch (error) {
-        toast.error("Xatolik yuz berdi");
-      } finally {
-        this.GetAll();
-      }
-    },
-
-
-    CardModalAction() {
-      this.isCartOpen = !this.isCartOpen;
-    },
-
-    // --- CART ACTIONS (OMBOR NAZORATI BILAN) ---
-    addToCart(product) {
-      const { toast } = useToast();
-      const productId = product.id || product._id;
-      const existingItem = this.cartItems.find(item => item.id === productId);
       
-      // Ombordagi mavjud miqdor (quantity kaliti orqali)
-      const stockLimit = product.quantity || 0;
-
+      // payload ichida: id, uniqueId, name, price, cartQuantity, image, is_stock, quantity (stock) keladi
+      const existingItem = this.cartItems.find(item => item.uniqueId === payload.uniqueId);
+      
       if (existingItem) {
-        if (product.is_stock && existingItem.cartQuantity >= stockLimit) {
-          toast.warning("Omborda boshqa qoldiq yo'q");
+        // Ombor nazorati: bitta ID dagi barcha porsiyalar yig'indisi stockdan oshmasligi kerak
+        const totalInCartOfThisFood = this.cartItems
+          .filter(i => i.id === payload.id)
+          .reduce((sum, i) => sum + i.cartQuantity, 0);
+
+        if (payload.is_stock && totalInCartOfThisFood + payload.cartQuantity > payload.quantity) {
+          toast.warning(`Omborda yetarli qoldiq yo'q. Maksimal: ${payload.quantity}`);
           return;
         }
-        existingItem.cartQuantity += 1;
+        existingItem.cartQuantity += payload.cartQuantity;
       } else {
-        if (product.is_stock && stockLimit <= 0) {
-          toast.error("Mahsulot tugagan");
-          return;
-        }
-        this.cartItems.push({ 
-          id: productId,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          is_stock: product.is_stock || false,
-          quantity: stockLimit, // Ombordagi jami qoldiq (chegara uchun)
-          cartQuantity: 1 // Savatdagi joriy miqdor
-        });
-        toast.success(`${product.name} qo'shildi`);
+        // Yangi uniqueId (yangi narx) bo'lsa
+        this.cartItems.push(payload);
+        toast.success(`${payload.name} savatga qo'shildi`);
       }
     },
 
-    updateCartQty({ id, change }) {
-      const item = this.cartItems.find(i => i.id === id);
+    updateCartQty({ uniqueId, change }) {
+      const item = this.cartItems.find(i => i.uniqueId === uniqueId);
       if (!item) return;
 
       const newQty = item.cartQuantity + change;
 
-      // Kamayish: 0 bo'lsa o'chirish
       if (newQty <= 0) {
-        this.removeFromCart(id);
+        this.removeFromCart(uniqueId);
         return;
       }
 
-      // Oshish: Ombor qoldig'idan (item.quantity) oshmasligi kerak
-      if (change > 0 && item.is_stock && newQty > item.quantity) {
-        const { toast } = useToast();
-        toast.warning(`Maksimal miqdor: ${item.quantity}`);
-        return;
+      // Ombor nazorati (ID bo'yicha umumiy tekshiruv)
+      if (change > 0 && item.is_stock) {
+        const totalInCart = this.cartItems
+          .filter(i => i.id === item.id)
+          .reduce((sum, i) => sum + i.cartQuantity, 0);
+
+        if (totalInCart + change > item.quantity) {
+          const { toast } = useToast();
+          toast.warning(`Ombor chegarasi: ${item.quantity}`);
+          return;
+        }
       }
 
       item.cartQuantity = newQty;
     },
 
-    // Input orqali manual kiritilganda
-    setManualQty(id, value) {
-      const item = this.cartItems.find(i => i.id === id);
+    setManualQty(uniqueId, value) {
+      const item = this.cartItems.find(i => i.uniqueId === uniqueId);
       if (!item) return;
 
       let val = parseInt(value) || 1;
       
-      if (item.is_stock && val > item.quantity) {
-        val = item.quantity;
+      if (item.is_stock) {
+        const otherItemsQty = this.cartItems
+          .filter(i => i.id === item.id && i.uniqueId !== uniqueId)
+          .reduce((sum, i) => sum + i.cartQuantity, 0);
+          
+        if (val + otherItemsQty > item.quantity) {
+          val = item.quantity - otherItemsQty;
+        }
       }
 
       if (val <= 0) {
-        this.removeFromCart(id);
+        this.removeFromCart(uniqueId);
       } else {
         item.cartQuantity = val;
       }
     },
 
-    removeFromCart(id) {
-      this.cartItems = this.cartItems.filter(i => i.id !== id);
+    removeFromCart(uniqueId) {
+      this.cartItems = this.cartItems.filter(i => i.uniqueId !== uniqueId);
     },
 
     clearCart() {
@@ -284,10 +256,12 @@ export const MenuStore = defineStore('MenuStore', {
       
       this.cartItems = orderData.items.map(item => ({
         id: item.foodId?._id || item.foodId,
+        // EDIT REJIMIDA HAM UNIQUE ID YARATAMIZ
+        uniqueId: `${(item.foodId?._id || item.foodId)}_${item.price}`,
         name: item.name,
         price: item.price,
         cartQuantity: item.quantity,
-        quantity: item.foodId?.quantity || item.quantity, // Ombor qoldig'i
+        quantity: item.foodId?.quantity || item.quantity, 
         is_stock: item.foodId?.is_stock || false,
         image: item.foodId?.image || null
       }));

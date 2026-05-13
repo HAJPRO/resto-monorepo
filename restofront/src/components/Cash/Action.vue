@@ -81,9 +81,12 @@
           {{ summary.totalInVault.toLocaleString() }} <span class="text-sm font-normal opacity-40 italic">UZS</span>
         </h2>
       </div>
-      <div class="bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full backdrop-blur-md">
-        <span class=" font-black text-emerald-400 uppercase tracking-widest text-[8px]">Smena Ochiq</span>
-      </div>
+     <div class="group flex items-center gap-2 px-2 py-1 border-l-2 border-emerald-500 bg-emerald-500/5 transition-all">
+  <i class="far fa-clock text-emerald-500 text-[10px]"></i>
+  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200  tracking-tighter">
+    Smena ochiq
+  </span>
+</div>
     </div>
 
     <!-- Moliya taqsimoti (Grid 3 ustunli) -->
@@ -168,114 +171,82 @@
   </div>
 
   <!-- SegmentTabs: Android/iOS "Sticky Tab" uslubi -->
-  <div v-if="isShiftOpen" class="px-1">
-    <div class="p-1 bg-slate-200/50 dark:bg-white/[0.03] backdrop-blur-xl rounded-[20px] border border-slate-300/20 dark:border-white/5 shadow-inner">
+  <div v-if="isShiftOpen" class="">
       <SegmentTabs 
         :tabs="actionTabs" 
         v-model="activeActionTab" 
         class="!mb-0" 
       />
-    </div>
   </div>
 </header>
-<div class="grid gap-3">
+<div class="grid gap-2 sm:gap-3">
   <div v-for="item in filteredActions" :key="item._id" 
-    class="group relative p-4 bg-white dark:bg-slate-900/40 rounded-[28px] flex justify-between items-center border border-slate-100 dark:border-white/[0.05] transition-all duration-300 hover:ring-2 hover:ring-indigo-500/20 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10">
+    class="group flex items-center justify-between p-3 sm:p-4 bg-slate-50/50 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.07] rounded-2xl sm:rounded-[24px] border border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all duration-200">
     
-    <div class="flex items-center gap-5">
-      <!-- Ikonka: Holatga qarab dinamik ranglar -->
+    <div class="flex items-center gap-3 sm:gap-4 min-w-0">
       <div :class="[
-        item.isOrder ? 'bg-emerald-500/10 text-emerald-500 ring-emerald-500/20' : catMap[item.type].colorClass,
-        'w-14 h-14 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-transparent transition-transform group-hover:scale-110'
+        item.isOrder ? 'bg-emerald-500/10 text-emerald-500' : catMap[item.type].colorClass,
+        'flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-base sm:text-lg transition-transform group-hover:scale-105'
       ]">
         <i :class="item.isOrder ? (item.orderType === 'table' ? 'fas fa-utensils' : 'fas fa-shopping-cart') : catMap[item.type].icon"></i>
       </div>
 
-      <!-- Matn qismi -->
-      <div class="space-y-1">
-        <div class="flex items-center gap-2">
-          <p class="text-[15px] font-[800] text-slate-800 dark:text-slate-100 leading-none">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 mb-0.5">
+          <p class="text-sm sm:text-[15px] font-bold text-slate-800 dark:text-slate-100 truncate">
             {{ item.displayTitle }}
           </p>
-          <span v-if="item.isOrder" class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 text-[9px] font-black text-slate-400 uppercase">
-            ID: {{ item._id.slice(-4).toUpperCase() }}
+          <span v-if="item.isOrder" class="hidden xs:inline-block text-[8px] font-bold text-slate-400 opacity-60">
+            #{{ item._id.slice(-4) }}
           </span>
         </div>
         
-        <div class="flex items-center gap-3">
-          <span class="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-            <i class="far fa-clock opacity-70"></i> {{ item.displayTime }}
+        <div class="flex items-center gap-2 text-[10px] font-medium text-slate-400">
+          <span class="flex items-center gap-1">
+            <i class="far fa-clock text-[9px]"></i> {{ item.displayTime }}
           </span>
           <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-          <span class="text-[10px] font-black text-indigo-500/80 uppercase tracking-widest">
-            {{ item.isOrder ? item.paymentMethodLabel : 'Operatsiya' }}
+          <span class="truncate uppercase tracking-tighter italic">
+            {{ item.isOrder ? item.paymentMethodLabel : 'Kassa' }}
           </span>
         </div>
       </div>
     </div>
 
-    <!-- O'ng tomon: Summa va Analitika -->
-    <div class="text-right flex flex-col items-end gap-1">
-      <div class="flex items-center gap-1.5">
-        <span v-if="item.type === 'out'" class="text-[10px] font-black text-rose-400 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Chiqim</span>
-        <p :class="(item.type === 'out') ? 'text-rose-500' : 'text-emerald-500'" 
-           class="text-lg font-[1000] tracking-tighter leading-none">
-          {{ item.type === 'out' ? '-' : '+' }}{{ item.displayAmount?.toLocaleString() }}
-          <span class="text-[10px] font-medium opacity-60 ml-0.5">UZS</span>
-        </p>
-      </div>
+    <div class="text-right ml-3">
+      <p :class="(item.type === 'out') ? 'text-rose-500' : 'text-emerald-500'" 
+         class="text-sm sm:text-base font-black tracking-tight leading-none mb-1">
+        {{ item.type === 'out' ? '-' : '+' }}{{ item.displayAmount?.toLocaleString() }}
+      </p>
       
-      <!-- Servis to'lovi va Status Badge -->
-      <div class="flex items-center gap-1.5">
-        <div v-if="item.isOrder && item.serviceFeeAmount > 0" 
-             class="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-500/20">
-          <span class="text-[8px] font-black uppercase">Servis:</span>
-          <span class="text-[9px] font-black">{{ item.serviceFeeAmount?.toLocaleString() }}</span>
-        </div>
+      <div class="flex items-center justify-end gap-1.5">
+        <!-- <span v-if="item.isOrder && item.serviceFeeAmount > 0" 
+              class="text-[8px] font-bold text-indigo-400">
+          +{{ item.serviceFeeAmount?.toLocaleString() }}
+        </span> -->
         
-        <div :class="item.isOrder ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' : 'bg-slate-50 dark:bg-white/5 text-slate-400'"
-             class="px-2 py-0.5 rounded-lg border border-transparent text-[8px] font-black uppercase tracking-widest">
-          {{ item.isOrder ? 'Sotuv' : 'Kassa' }}
-        </div>
+        <span :class="item.isOrder ? 'text-emerald-500/60' : 'text-slate-400/60'"
+              class="text-[8px] font-black uppercase tracking-widest">
+          {{ item.isOrder ? 'Sotuv' : 'Operatsiya' }}
+        </span>
       </div>
     </div>
   </div>
-  <!-- Empty State (Ma'lumot bo'sh bo'lgan holat) -->
-<div v-if="filteredActions.length === 0" 
-     class="relative overflow-hidden py-20 px-6 flex flex-col items-center justify-center text-center bg-white/30 dark:bg-slate-900/20 rounded-[40px] border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all">
-  
-  <!-- Dekorativ fon elementlari -->
-  <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl"></div>
-  <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl"></div>
 
-  <!-- Animatsiyali Ikonka -->
-  <div class="relative mb-6">
-    <div class="w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-[32px] flex items-center justify-center text-4xl text-slate-300 dark:text-slate-700 animate-pulse">
-      <i class="fas fa-folder-open"></i>
+  <div v-if="filteredActions.length === 0" 
+       class="py-16 flex flex-col items-center justify-center text-center opacity-60">
+    <div class="w-16 h-16 mb-4 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-2xl text-slate-300 dark:text-slate-600">
+      <i class="fas fa-inbox"></i>
     </div>
-    <!-- Kichik dekorativ zarrachalar -->
-    <div class="absolute -top-2 -right-2 w-6 h-6 bg-amber-400/20 rounded-full flex items-center justify-center text-[10px] text-amber-500">
-      <i class="fas fa-search"></i>
-    </div>
+    <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Ma'lumot topilmadi</h3>
+    <p class="text-[10px] uppercase tracking-widest mt-1 text-slate-400">Filtrni tekshirib ko'ring</p>
+    
+    <button v-if="activeActionTab !== 'all'" 
+            @click="activeActionTab = 'all'"
+            class="mt-6 text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] hover:underline">
+      Barchasini ko'rsatish
+    </button>
   </div>
-
-  <!-- Matnlar -->
-  <div class="max-w-[280px] space-y-2">
-    <h3 class="text-xl font-[900] text-slate-800 dark:text-slate-200 tracking-tight">
-      Hozircha hech narsa yo'q
-    </h3>
-    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-      Siz tanlagan filtr yoki bo'lim bo'yicha ma'lumotlar topilmadi
-    </p>
-  </div>
-
-  <!-- Harakat tugmasi (ixtiyoriy) -->
-  <button v-if="activeActionTab !== 'all'" 
-          @click="activeActionTab = 'all'"
-          class="mt-8 px-6 py-3 bg-slate-800 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-500/10">
-    Barcha harakatlarni ko'rish
-  </button>
-</div>
 </div>
           </div>
         </div>
@@ -394,7 +365,7 @@ const filteredActions = computed(() => {
         isOrder: true,
         type: 'orders',
         // Buyurtma sarlavhasi (Masalan: Stol #5 yoki Oddiy savdo)
-        displayTitle: order.orderType === 'table' ? `Stol #${order.tableId?.slice(-3)}` : 'Tezkor Savdo',
+        displayTitle: order.orderType === 'table' ? `Stol:№${order.tableId.number}` : 'Saboy',
         displayAmount: order.finalTotal, // Yakuniy summa (xizmat haqi bilan)
         displayTime: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         paymentMethodLabel: paymentLabel,
@@ -483,7 +454,7 @@ const Tabs = [
   { id: 'cash', label: 'Kassa', routeName: 'cash', icon: 'fas fa-wallet' }, 
   { id: 'order', label: 'Buyurtmalar', routeName: 'order', icon: 'fas fa-shopping-cart' },
   { id: 'tables', label: 'Stollar', routeName: 'tables', icon: 'fas fa-table' },
-  { id: 'report', label: 'Hisobotlar', routeName: 'report', icon: 'fas fa-chart-bar' }
+  { id: 'report', label: 'Statistika', routeName: 'statistic', icon: 'fas fa-chart-bar' }
 
 ];
 

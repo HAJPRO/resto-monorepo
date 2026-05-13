@@ -214,3 +214,82 @@ if (template.showCustomer && order.customerId?.name) {
 
   return c;
 };
+
+export const generateKitchenContent = (order, template) => {
+  let c = COMMANDS.RESET;
+  c += COMMANDS.SET_LATIN_PAGE;
+  
+  const width = template.paperWidth === 58 ? 32 : 48;
+  const separator = "-".repeat(width) + "\n";
+
+  // 1. HEADER (STOL VA VAQT)
+  c += COMMANDS.CENTER;
+  c += COMMANDS.BOLD_ON + COMMANDS.DOUBLE_SIZE;
+  if (order.tableId?.number) {
+    c += `STOL: ${order.tableId.number}\n`;
+  }
+  c += COMMANDS.NORMAL_SIZE;
+  
+  const date = order.createdAt ? new Date(order.createdAt) : new Date();
+  const timeStr = date.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+  c += `VAQT: ${timeStr}\n`;
+  c += COMMANDS.BOLD_OFF;
+  c += separator;
+
+  // 2. OFITSIANT
+  c += COMMANDS.LEFT;
+  if (order.staffId?.firstname) {
+    c += `OFITSIANT: ${clean(order.staffId.firstname)}\n`;
+  }
+  c += separator;
+
+  // 3. MAHSULOTLAR SARLAVHASI
+  c += COMMANDS.BOLD_ON;
+  // Sarlavhani ustunlarga moslaymiz (Nomi, Soni, Narxi)
+  if (width === 32) {
+    // 58mm printer uchun qisqaroq
+    c += formatRow("NOMI", "S/NARX", width) + "\n";
+  } else {
+    // 80mm printer uchun kengroq
+    c += formatRow("MAHSULOT NOMI", "SONI x NARX", width) + "\n";
+  }
+  c += COMMANDS.BOLD_OFF;
+  c += separator;
+
+  // 4. MAHSULOTLAR RO'YXATI
+  order.items.forEach(item => {
+    const name = clean(item.name).toUpperCase();
+    const qty = item.quantity;
+    const price = item.price.toLocaleString(); // Narxni formatlash
+    const total = (item.quantity * item.price).toLocaleString();
+
+    // Birinchi qator: Mahsulot nomi va jami summasi (Bold qilingan)
+    c += COMMANDS.BOLD_ON;
+    c += formatRow(name, total, width) + "\n";
+    c += COMMANDS.BOLD_OFF;
+
+    // Ikkinchi qator: Miqdori va donasining narxi (Kichikroq ko'rinishda)
+    const detailStr = `   ${qty} x ${price}`;
+    c += detailStr + "\n";
+
+    // Agar mahsulotga izoh bo'lsa
+    if (item.comment) {
+      c += `   *IZOH: ${clean(item.comment)}\n`;
+    }
+  });
+
+  c += separator;
+
+  // 5. UMUMIY SUMMA (Agar oshxonaga jami summa ham kerak bo'lsa)
+  if (order.finalTotal) {
+    c += COMMANDS.BOLD_ON + COMMANDS.RIGHT;
+    c += `JAMI: ${order.finalTotal.toLocaleString()} ${template.currency || "so'm"}\n`;
+    c += COMMANDS.BOLD_OFF;
+  }
+
+  // 6. FINISH
+  c += "\n".repeat(3); 
+  c += COMMANDS.CUT;
+
+  return c;
+};

@@ -7,7 +7,6 @@
       @close="isCartOpen = false"
     >
       <div class="space-y-4">
-        <!-- Tablar: Buyurtmalar va Sozlamalar -->
         <div class="mt-0 top-[-20px] z-[100] mb-6 p-1.5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[20px] flex gap-1 border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] mx-2">
           <button
             v-for="tab in ['items', 'settings']"
@@ -25,7 +24,6 @@
           </button>
         </div>
 
-        <!-- Buyurtmalar Ro'yxati Tab -->
         <div v-if="activeTab === 'items'" class="space-y-4 animate-fade-in">
           <div v-if="cartItems.length > 0" class="flex items-center justify-between px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
             <span>Taomlar ({{ totalItemsCount }} ta)</span>
@@ -35,9 +33,8 @@
           </div>
 
           <div v-if="cartItems.length > 0" class="space-y-3 h-[400px] overflow-y-auto pr-1 custom-scrollbar">
-            <div v-for="item in cartItems" :key="item.id" class="bg-white dark:bg-slate-900 rounded-[28px] p-2 flex gap-4 items-center border border-slate-100 dark:border-white/5 relative">
+            <div v-for="item in cartItems" :key="item.uniqueId" class="bg-white dark:bg-slate-900 rounded-[28px] p-2 flex gap-4 items-center border border-slate-100 dark:border-white/5 relative">
               
-              <!-- Qoldiq indikatori (Stock indicator) -->
               <div v-if="item.is_stock" class="absolute top-2 right-10">
                 <span :class="['text-[8px] font-black px-1.5 py-0.5 rounded-md border uppercase', 
                   item.cartQuantity >= item.quantity ? 'bg-rose-50 text-rose-500 border-rose-100' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-white/5']">
@@ -45,12 +42,15 @@
                 </span>
               </div>
 
-              <img :src="item.image" class="w-16 h-16 rounded-[20px] object-cover bg-slate-100" />
+              <img :src="item.image" class="w-16 h-16 rounded-[20px] object-cover bg-slate-100 dark:bg-slate-800" />
               
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between">
-                  <h4 class="text-sm font-black truncate dark:text-white text-slate-800 uppercase">{{ item.name }}</h4>
-                  <button @click="handleRemove(item.id)" class="text-slate-300 hover:text-rose-500 transition-all">
+                  <div>
+                    <h4 class="text-sm font-black truncate dark:text-white text-slate-800 uppercase">{{ item.name }}</h4>
+                    <p class="text-[9px] text-indigo-500 font-bold uppercase tracking-tight">{{ item.price.toLocaleString() }} UZS</p>
+                  </div>
+                  <button @click="handleRemove(item.uniqueId)" class="text-slate-300 hover:text-rose-500 transition-all">
                     <i class="fa-solid fa-trash-can text-xs"></i>
                   </button>
                 </div>
@@ -61,24 +61,22 @@
                     <span class="text-[9px] opacity-40">uzs</span>
                   </p>
 
-                  <!-- Miqdorni boshqarish (Counter) -->
                   <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1 border border-slate-200 dark:border-white/5">
-                    <button @click="handleUpdateQty(item.id, -1)" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center active:scale-75 shadow-sm text-slate-600 dark:text-white">
+                    <button @click="handleUpdateQty(item.uniqueId, -1)" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center active:scale-75 shadow-sm text-slate-600 dark:text-white">
                       <i class="fa-solid fa-minus text-[10px]"></i>
                     </button>
                     
                     <div class="flex flex-col items-center min-w-[40px]">
                       <input 
                         type="number" 
-                        max=""
                         :value="item.cartQuantity"
-                        @input="(e) => handleManualQty(item, e.target.value)"
+                        @input="(e) => handleManualQty(item.uniqueId, e.target.value)"
                         class="w-full bg-transparent text-center text-[12px] font-black dark:text-white border-none focus:ring-0 p-0 m-0 outline-none"
                       />
                     </div>
 
                     <button 
-                      @click="handleUpdateQty(item.id, 1)" 
+                      @click="handleUpdateQty(item.uniqueId, 1)" 
                       :disabled="item.is_stock && item.cartQuantity >= item.quantity"
                       :class="['w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 shadow-sm transition-all', 
                         (item.is_stock && item.cartQuantity >= item.quantity) ? 'bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed' : 'bg-indigo-600 text-white']"
@@ -97,10 +95,8 @@
           </div>
         </div>
 
-        <!-- Sozlamalar Tab -->
         <div v-if="activeTab === 'settings'" class="space-y-6 animate-fade-in">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Xizmat haqi tugmasi -->
             <div @click="feeModel.status === 'active' && (isServiceActive = !isServiceActive)" class="bg-slate-50 dark:bg-slate-800/40 rounded-[28px] p-3 flex items-center justify-between border border-slate-100 dark:border-white/5 cursor-pointer">
               <div class="flex items-center gap-2">
                 <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', isServiceActive ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400']">
@@ -116,7 +112,6 @@
               </div>
             </div>
 
-            <!-- Chegirma kiriting -->
             <div class="bg-slate-50 dark:bg-slate-800/40 rounded-[28px] p-3 border border-slate-100 dark:border-white/5 flex items-center gap-3">
               <div :class="['w-10 h-10 rounded-xl flex items-center justify-center shrink-0', discountPercent > 0 ? 'bg-rose-500 text-white' : 'bg-slate-200 text-slate-400']">
                 <i class="fa-solid fa-percent text-xs"></i>
@@ -129,7 +124,6 @@
           </div>
 
           <div class="grid grid-cols-1 gap-4">
-            <!-- Buyurtma turi -->
             <div class="p-1 bg-slate-100 dark:bg-slate-800/50 rounded-[22px] flex gap-1">
               <button v-for="type in ['table', 'takeaway']" :key="type" @click="orderType = type" :class="['flex-1 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2', orderType === type ? 'bg-white dark:bg-slate-700 text-indigo-600 shadow-sm' : 'text-slate-400']">
                 <i :class="type === 'table' ? 'fa-solid fa-chair' : 'fa-solid fa-bag-shopping'"></i>
@@ -137,137 +131,67 @@
               </button>
             </div>
             
-            <!-- Stol, Mijoz, Ofitsiant va Izoh -->
-              <div v-if="orderType === 'table'" class="grid grid-cols-1 md:grid-cols-1 gap-4 animate-fade-in">
-<Select 
-  v-model="selectedTable" 
-  size="small" 
-  label="Stol Tanlang" 
-  :options="tabels" 
-  labelKey="number" 
-  valueKey="_id" 
-  searchable 
-  placeholder="Stol raqami..."
->
-  <template #option="{ option }">
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-3">
-        <div 
-          :class="[
-            'w-10 h-10 rounded-xl flex flex-col items-center justify-center border-2 transition-all',
-            option.status === '0' 
-              ? 'border-emerald-500/20 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' 
-              : 'border-rose-500/20 bg-rose-50 text-rose-600 dark:bg-rose-500/10'
-          ]"
-        >
-          <span class="text-[10px] uppercase font-black leading-none">№</span>
-          <span class="text-sm font-black">{{ option.number }}</span>
-        </div>
-
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
-            {{ option.position }}
-          </span>
-          <span class="text-[10px] text-slate-400 font-medium">
-            <i class="fa-solid fa-users mr-1"></i> {{ option.capacity || 4 }}
-          </span>
-        </div>
-      </div>
-
-      <div class="flex flex-col items-end gap-1">
-        <span 
-          :class="[
-            'px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border',
-            option.status === '0'
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' 
-              : 'bg-rose-500/10 border-rose-500/20 text-rose-600'
-          ]"
-        >
-          {{ option.status === '0' ? 'Bo\'sh' : 'Band' }}
-        </span>
-       
-      </div>
-    </div>
-  </template>
-</Select>
-        
+            <div v-if="orderType === 'table'" class="grid grid-cols-1 md:grid-cols-1 gap-4 animate-fade-in">
+              <Select v-model="selectedTable" size="small" label="Stol Tanlang" :options="tabels" labelKey="number" valueKey="_id" searchable placeholder="Stol raqami...">
+                <template #option="{ option }">
+                  <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-3">
+                      <div :class="['w-10 h-10 rounded-xl flex flex-col items-center justify-center border-2 transition-all', option.status === '0' ? 'border-emerald-500/20 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : 'border-rose-500/20 bg-rose-50 text-rose-600 dark:bg-rose-500/10']">
+                        <span class="text-[10px] uppercase font-black leading-none">№</span>
+                        <span class="text-sm font-black">{{ option.number }}</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ option.position }}</span>
+                        <span class="text-[10px] text-slate-400 font-medium"><i class="fa-solid fa-users mr-1"></i> {{ option.capacity || 4 }}</span>
+                      </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                      <span :class="['px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border', option.status === '0' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-rose-500/10 border-rose-500/20 text-rose-600']">{{ option.status === '0' ? 'Bo\'sh' : 'Band' }}</span>
+                    </div>
+                  </div>
+                </template>
+              </Select>
             </div>
-                <Select 
-  v-model="selectedCustomer" 
-  :options="customers" 
-  label="Mijozni tanlang"
-  labelKey="name" 
-  valueKey="_id"
-  searchable
-  clearable
-  size="small" 
 
->
-  <template #option="{ option }">
-    <div class="flex items-center justify-between w-full ">
-      <div class="flex flex-col">
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
-          {{ option.name }}
-        </span>
-        <span class="text-[10px] text-slate-400">tel: {{ option.phone }}</span>
-      </div>
+            <Select v-model="selectedCustomer" :options="customers" label="Mijozni tanlang" labelKey="name" valueKey="_id" searchable clearable size="small">
+              <template #option="{ option }">
+                <div class="flex items-center justify-between w-full ">
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ option.name }}</span>
+                    <span class="text-[10px] text-slate-400">tel: {{ option.phone }}</span>
+                  </div>
+                  <div class="text-right">
+                    <p :class="option.balance < 0 ? 'text-rose-500' : 'text-emerald-500'" class="text-[12px] font-black">{{ new Intl.NumberFormat('uz-UZ').format(option.balance) }} <span class="text-[9px] opacity-70">UZS</span></p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter">Balans</p>
+                  </div>
+                </div>
+              </template>
+            </Select>
 
-      <div class="text-right">
-        <p :class="option.balance < 0 ? 'text-rose-500' : 'text-emerald-500'" class="text-[12px] font-black">
-          {{ new Intl.NumberFormat('uz-UZ').format(option.balance) }}
-          <span class="text-[9px] opacity-70">UZS</span>
-        </p>
-        <p class="text-[9px] text-slate-400 uppercase tracking-tighter">Balans</p>
-      </div>
-    </div>
-  </template>
-</Select>
-          <Select 
-  v-model="selectedStaff" 
-  size="small" 
-  label="Mas'ul Ofitsiant" 
-  :options="employees" 
-  labelKey="firstname" 
-  valueKey="_id" 
-  searchable 
-  placeholder="Ofitsiantni tanlang..."
-  clearable
->
-  <template #option="{ option }">
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-3">
-        <div class="relative">
-          <img 
-            :src="option.image || 'https://ui-avatars.com/api/?name=' + option.firstname" 
-            class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover"
-          />
-          <span v-if="option.isOnline" class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
-        </div>
-
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-slate-800 dark:text-slate-100">
-            {{ option.firstname }} {{ option.lastname }}
-          </span>
-          <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-            {{ option.position || option.role }}
-          </span>
-        </div>
-      </div>
-
-      <div v-if="option.phone" class="text-right">
-        <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md">
-          #{{ option.phone.slice(-4) }}
-        </span>
-      </div>
-    </div>
-  </template>
-</Select>
+            <Select v-model="selectedStaff" size="small" label="Mas'ul Ofitsiant" :options="employees" labelKey="firstname" valueKey="_id" searchable placeholder="Ofitsiantni tanlang..." clearable>
+              <template #option="{ option }">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-3">
+                    <div class="relative">
+                      <img :src="option.image || 'https://ui-avatars.com/api/?name=' + option.firstname" class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover" />
+                      <span v-if="option.isOnline" class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ option.firstname }} {{ option.lastname }}</span>
+                      <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{{ option.position || option.role }}</span>
+                    </div>
+                  </div>
+                  <div v-if="option.phone" class="text-right">
+                    <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md">#{{ option.phone.slice(-4) }}</span>
+                  </div>
+                </div>
+              </template>
+            </Select>
             <TextArea v-model="orderComment" placeholder="Izohlar..." label="Buyurtma uchun izoh..." />
           </div>
         </div>
       </div>
 
-      <!-- Modal Footer (Jami summa) -->
       <template #footer>
         <div class="w-full space-y-2">
           <div class="grid grid-cols-3 gap-2 px-2 border-b border-slate-100 dark:border-white/5 pb-2">
@@ -327,18 +251,19 @@ onMounted(async () => {
   ]);
 });
 
-const handleUpdateQty = async (id, change) => {
-  store_menu.updateCartQty({ id, change });
+// ID o'rniga uniqueId ishlatiladi
+const handleUpdateQty = async (uniqueId, change) => {
+  store_menu.updateCartQty({ uniqueId, change });
   await Haptics.impact({ style: ImpactStyle.Light });
 };
 
-const handleManualQty = (item, value) => {
-  const val = parseInt(value);
-  store_menu.setManualQty(item.id || item._id, val);
+const handleManualQty = (uniqueId, value) => {
+  const val = parseInt(value) || 0;
+  store_menu.setManualQty(uniqueId, val);
 };
 
-const handleRemove = async (id) => {
-  store_menu.removeFromCart(id);
+const handleRemove = async (uniqueId) => {
+  store_menu.removeFromCart(uniqueId);
   await Haptics.impact({ style: ImpactStyle.Medium });
 };
 

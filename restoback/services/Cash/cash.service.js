@@ -120,10 +120,17 @@ class CashService {
         }
 
         try {
-            const activeShift = await Cash.findOne({ 
-                status: 'open', 
-                cashierId: req.user.id 
-            }).populate('closedOrderIds');
+        const activeShift = await Cash.findOne({ 
+    status: 'open', 
+    cashierId: req.user.id
+}).populate({
+    path: 'closedOrderIds',
+    populate: {
+        path: 'tableId',
+        // Faqat 'number' maydonini oladi, '_id' har doim default keladi
+        select: 'number' 
+    }
+});
 
             return { 
                 success: true, 
