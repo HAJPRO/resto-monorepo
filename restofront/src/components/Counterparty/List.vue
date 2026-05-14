@@ -141,7 +141,7 @@
                   <i class="fas fa-phone-alt"></i> QO'NG'IROQ
                 </button>
                 <button 
-                  @click.stop="openTelegram(item.phone)"
+                  @click.stop="open(item.phone)"
                   class="flex-1 h-11 rounded-2xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 flex items-center justify-center gap-2 text-xs font-black transition-transform active:scale-95"
                 >
                   <i class="fab fa-telegram-plane text-base"></i> TELEGRAM

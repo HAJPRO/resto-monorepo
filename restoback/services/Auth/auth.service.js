@@ -17,6 +17,7 @@ class AuthService {
     // 1. Shu tenant ichida username band emasligini tekshirish
     const existUser = await User.findOne({ username });
     if (existUser) {
+
       throw BaseError.BadRequest(`Username ${username} allaqachon band!`);
     }
 
@@ -39,62 +40,80 @@ class AuthService {
   }
 
  
- async login(req, username, password) {
+async login(req, username, password) {
     const { companyCode } = req.body;
 
     // 1. Markaziy bazadan kompaniyani tekshirish
-    const tenant = await CentralTenantModel.findOne({ companyCode, isActive: true });
+    const tenant = await CentralTenantModel.findOne({ companyCode });
     
     if (!tenant) {
-      throw BaseError.BadRequest("Bunday kompaniya tizimda mavjud emas yoki bloklangan!");
+      return { status: false, msg: "Bunday kompaniya tizimda mavjud emas!" };
     }
 
-    // 2. Haqiqiy kompaniya bazasiga ulanishni hosil qilish
-    const db = await getTenantDB(tenant.dbName);
+    // --- BALANS VA STATUS TEKSHIRUVI ---
+    if (!tenant.isActive || tenant.status === 'suspended') {
+      return { status: false, msg: "Sizning kompaniyangiz bloklangan. Iltimos, administratorga murojaat qiling!" };
+    }
+
+    const now = new Date();
+    // Qarzni tekshirish mantiqi
+    if (tenant.billing.balance <= 0 && tenant.status === 'expired') {
+      return { status: false, msg: "Sizda qarzdorlik bor! Iltimos, administratorga murojaat qiling!" };
+    }
     
-    // 3. AYNAN SHU BAZA MODELLARINI OLISH (Mana shu qator muhim!)
-    // Avvalgi req.tenantModels ni ishlatmang, u noto'g'ri bazaga bog'langan bo'lishi mumkin
+    // Obuna muddati
+    if (tenant.subscription.expiresAt && new Date(tenant.subscription.expiresAt) < now) {
+      return { status: false, msg: "Sizning obuna muddatingiz yakunlangan! Iltimos, administratorga murojaat qiling!" };
+    }
+
+    // 2. Tenant bazasiga ulanish
+    const db = await getTenantDB(tenant.dbName);
     const { User, Token } = initModels(db); 
 
     if (!User || !Token) {
-      throw BaseError.InternalServerError("Kompaniya bazasiga ulanishda texnik xatolik!");
+      return { status: false, msg: "Kompaniya bazasiga ulanishda texnik xatolik!" };
     }
 
-    // 4. Foydalanuvchini AYNAN SHU kompaniya bazasidan qidirish
-   const user = await User.findOne({ username })
-  .populate({
-    path: 'roles',         // 1-daraja: User modelidagi roles massivini ochish
-    model: 'Role',         // Rol modeli nomi
-    populate: {
-      path: 'permissions', // 2-daraja: Role modeli ichidagi permissions massivini ochish
-      model: 'Permission'  // Permission modeli nomi
-    }
-  })
-  .select('+password');    // Yashirilgan parolni olish
-    // ... (qolgan parolni tekshirish va token yaratish qismi bir xil)
-    console.log(user)
+    // 3. Foydalanuvchini tekshirish
+    const user = await User.findOne({ username })
+      .populate({
+        path: 'roles',
+        populate: { path: 'permissions', model: 'Permission' }
+      })
+      .select('+password');
+
     if (!user) {
-      throw BaseError.BadRequest("Foydalanuvchi nomi yoki parol noto'g'ri");
+      return { status: false, msg: "Foydalanuvchi nomi yoki parol noto'g'ri" };
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw BaseError.BadRequest("Foydalanuvchi nomi yoki parol noto'g'ri");
+      return { status: false, msg: "Foydalanuvchi nomi yoki parol noto'g'ri" };
     }
+
+    // 4. Tokenlarni yaratish
     const userDto = new UserDto(user);
     const tokens = tokenService.generateToken({
       id: userDto.id,
       roles: userDto.roles,
       companyCode: tenant.companyCode,
+      tenantId: tenant._id,
     });
-console.log(userDto)
 
     await tokenService.saveToken(userDto.id, tokens.refreshToken, Token);
 
     return {
+      status: true,
+      msg: "Tizimga muvaffaqiyatli kirdingiz!",
       user: userDto,
       ...tokens,
       companyCode: tenant.companyCode,
+      billing: {
+        balance: tenant.billing.balance,
+        daysRemaining: tenant.daysRemaining, 
+        isLow: tenant.isLowBalance,
+        currency : tenant.billing.currency
+      },
       loginAt: new Date()
     };
 }

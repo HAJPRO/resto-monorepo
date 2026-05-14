@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useToast } from "../../UI/utils/useToast";
+import { toast } from "../../UI/utils/useToast";
 import { MenuService } from "../../ApiService/index.service";
 import { TabelStore, FeeStore } from "../../stores/index.store";
 import { jwtDecode } from 'jwt-decode';
@@ -86,10 +86,25 @@ export const MenuStore = defineStore('MenuStore', {
       }
       this.isModal = !this.isModal;
     },
+ async Create(payload) {
+   
+      try {
+          const data = await MenuService.Create(payload);
+          toast.success("Yangilandi!");
+      } catch (error) {
+        toast.error("Xatolik yuz berdi");
+      } finally {
+        this.GetAll();
+      }
+    },
 
+
+    CardModalAction() {
+      this.isCartOpen = !this.isCartOpen;
+    },
     // --- CART ACTIONS (UNIQUE ID LOGIKASI BILAN) ---
     addToCart(payload) {
-      const { toast } = useToast();
+   
       
       // payload ichida: id, uniqueId, name, price, cartQuantity, image, is_stock, quantity (stock) keladi
       const existingItem = this.cartItems.find(item => item.uniqueId === payload.uniqueId);
@@ -130,7 +145,7 @@ export const MenuStore = defineStore('MenuStore', {
           .reduce((sum, i) => sum + i.cartQuantity, 0);
 
         if (totalInCart + change > item.quantity) {
-          const { toast } = useToast();
+       
           toast.warning(`Ombor chegarasi: ${item.quantity}`);
           return;
         }
@@ -184,7 +199,7 @@ export const MenuStore = defineStore('MenuStore', {
         const response = await MenuService.GetAll(payload);
         this.menus = response.data.data.data;
       } catch (error) {
-        const { toast } = useToast();
+     
         toast.error("Ma'lumotlarni yuklashda xatolik");
       } finally {
         this.loading = false;
@@ -194,7 +209,7 @@ export const MenuStore = defineStore('MenuStore', {
     async CreateOrder() {
       const storeTabel = TabelStore();
       const feeStore = FeeStore();
-      const { toast } = useToast();
+   
       this.loading = true;
 
       try {

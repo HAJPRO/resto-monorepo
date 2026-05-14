@@ -95,7 +95,8 @@
             <Guard :roles="['1000']">
               <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-4">Sozlamalar</p>
               
-              <button @click="toggleSection('settings')" 
+             
+                 <button @click="toggleSection('settings')" 
                 :class="[
                   'w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 relative group',
                   openSections.settings ? 'bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5'
@@ -105,10 +106,36 @@
                 <span class="flex-1 text-left text-[13px] font-bold tracking-tight">Tizim sozlamalari</span>
                 <ion-icon :icon="chevronDownOutline" :class="{ 'rotate-180': openSections.settings }" class="text-[10px] transition-transform duration-300" />
               </button>
+               <button @click="toggleSection('subscriptions')" 
+                :class="[
+                  'w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 relative group',
+                  openSections.subscriptions ? 'bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5'
+                ]">
+                <div v-if="openSections.subscriptions" class="absolute left-0 w-1 h-5 bg-indigo-600 rounded-r-full"></div>
+                <ion-icon :icon="cardOutline" class="text-xl" :class="openSections.subscriptions ? 'opacity-100' : 'opacity-70'" />
+                <span class="flex-1 text-left text-[13px] font-bold tracking-tight">Obunalar</span>
+                <ion-icon :icon="chevronDownOutline" :class="{ 'rotate-180': openSections.subscriptions }" class="text-[10px] transition-transform duration-300" />
+              </button>
 
               <transition name="expand">
                 <div v-show="openSections.settings" class="ml-4 pl-8 border-l-2 border-slate-100 dark:border-slate-800 space-y-1">
                   <template v-for="sub in staffSubs" :key="'settings-' + sub.routeName">
+                    <Guard :roles="sub.roles" :permissions="sub.permissions">
+                      <router-link :to="{ name: sub.routeName }" v-slot="{ isActive, navigate }">
+                        <div @click="navigate" 
+                          class="flex items-center gap-3 py-2.5 text-[12px] font-bold transition-all cursor-pointer"
+                          :class="isActive ? 'text-indigo-600 translate-x-1' : 'text-slate-500 hover:text-indigo-600'">
+                          <ion-icon :icon="sub.icon" class="text-[14px]" /> 
+                          {{ sub.label }}
+                        </div>
+                      </router-link>
+                    </Guard>
+                  </template>
+                </div>
+              </transition>
+               <transition name="expand">
+                <div v-show="openSections.subscriptions" class="ml-4 pl-8 border-l-2 border-slate-100 dark:border-slate-800 space-y-1">
+                  <template v-for="sub in subscriptionsSubs" :key="'subscriptions-' + sub.routeName">
                     <Guard :roles="sub.roles" :permissions="sub.permissions">
                       <router-link :to="{ name: sub.routeName }" v-slot="{ isActive, navigate }">
                         <div @click="navigate" 
@@ -165,7 +192,9 @@ import {
   fileTray,
   fileTrayOutline,
   filterOutline,
-  calculatorOutline
+  calculatorOutline,
+  cardOutline,
+  serverOutline
 } from "ionicons/icons";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
@@ -173,7 +202,7 @@ const route = useRoute();
 
 // --- STATE ---
 const openSections = ref({
-  staff: false, supply: false, inventory: false, tmo: false, settings: false, custom: false, product: false,zone:false, counterparty: false, cash: false
+  staff: false, supply: false, inventory: false, tmo: false, settings: false, custom: false, product: false,zone:false, counterparty: false, cash: false,subscriptions:false
 });
 
 // --- CONFIGS ---
@@ -237,6 +266,14 @@ const staffSubs = [
   { label: "Chek sozlamalari", routeName: "check", icon: printOutline },
   { label: "Xizmat foizi (%)", routeName: "fee", icon: receiptOutline },
 ];
+
+const subscriptionsSubs = [
+  { label: "Server balansi", routeName: "server", icon: serverOutline, roles: ['1000'] },
+ 
+];
+
+
+
 
 // --- LOGIC ---
 

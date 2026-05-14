@@ -2,9 +2,10 @@
   <ion-app>
     <ion-router-outlet />
     
-    <!-- <ToastContainer /> -->
+    <Toast />
 
     <LockScreen />
+
   </ion-app>
 </template>
 
@@ -13,6 +14,7 @@ import { onMounted, onUnmounted, watch } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import LockScreen from "./components/Lock/LockScreen.vue";
 import { LockStore } from "./stores/index.store";
+import {Toast} from "./UI/UI"
 
 const lockStore = LockStore();
 let timeout = null;

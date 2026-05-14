@@ -19,41 +19,42 @@ class AuthController {
   /**
  * Login Controller - Foydalanuvchi kirishini boshqarish
  */
-  async login(req, res, next) {
-    try {
-      const { username, password } = req.body;
+async login(req, res, next) {
+  try {
+    const { username, password } = req.body;
+    const result = await AuthService.login(req, username, password);
 
-      // 1. Service qatlamiga murojaat
-      // 'req' obyektini uzatish orqali Service ichida tenantModels'dan foydalanish mumkin
-      const userData = await AuthService.login(req, username, password);
-
-      // 2. Cookie sozlamalari (Security Hardening)
-      const isProd = process.env.NODE_ENV === 'production';
-
-      res.cookie("refreshToken", userData.refreshToken, {
-        httpOnly: true,    // JavaScript orqali o'g'irlashni oldini oladi (XSS protection)
-        secure: isProd,    // Faqat HTTPS orqali yuboriladi
-        sameSite: isProd ? 'none' : 'lax', // Cross-site request forgery (CSRF) himoyasi
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 kun
-        path: '/',         // Hamma endpointlar uchun amal qiladi
+    // Agar service qatlami xatolik qaytarsa (status: false)
+    if (!result.status) {
+      return res.status(400).json({
+        success: false,
+        message: result.msg
       });
-
-      // 3. Front-endga javob qaytarish
-      // Refresh tokenni JSON ichida qaytarmaslik xavfsizlik nuqtai nazaridan yaxshiroq
-      const { refreshToken, ...clientData } = userData;
-
-      return res.status(200).json({
-        success: true,
-        message: "Tizimga muvaffaqiyatli kirildi",
-        data: clientData // User, AccessToken va boshqa ma'lumotlar
-      });
-
-    } catch (error) {
-      // 4. Xatolikni markazlashgan error-handler'ga uzatish
-      console.error(`[LoginController Error]: ${new Date().toISOString()}`, error);
-      next(error);
     }
+
+    // Muvaffaqiyatli bo'lsa Cookie o'rnatish
+    const isProd = process.env.NODE_ENV === 'production';
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    // Refresh tokenni olib tashlab, qolganini yuboramiz
+    const { refreshToken, ...finalData } = result;
+
+    return res.status(200).json({
+      success: true,
+      message: result.msg,
+      data: finalData
+    });
+
+  } catch (error) {
+    next(error);
   }
+}
   async update(req, res, next) {
     try {
       const data = await AuthService.update(req, req.body);
