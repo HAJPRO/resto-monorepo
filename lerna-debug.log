@@ -1,91 +1,24 @@
 0 silly argv {
 0 silly argv   _: [ 'version' ],
 0 silly argv   lernaVersion: '9.0.7',
-0 silly argv   '$0': 'node_modules\\lerna\\dist\\cli.js'
+0 silly argv   '$0': '..\\node_modules\\lerna\\dist\\cli.js'
 0 silly argv }
 1 notice cli v9.0.7
-2 verbose packageConfigs Explicit "packages" configuration found in lerna.json. Resolving packages using the configured glob(s): ["restoback","restofront"]
+2 verbose packageConfigs Explicit "packages" configuration found in lerna.json. Resolving packages using the configured glob(s): ["restoback","restofront","latticoback","latticofront"]
 3 verbose rootPath C:\Users\Dell\Desktop\restoapp\restoapps
-4 info versioning independent
-5 silly isAnythingCommitted
-6 verbose isAnythingCommitted 1
-7 silly getCurrentBranch
-8 verbose currentBranch main
-9 silly remoteBranchExists
-10 silly isBehindUpstream
-11 silly isBehindUpstream main is behind origin/main by 0 commit(s) and ahead by 0
-12 silly hasTags
-13 verbose hasTags true
-14 silly git-describe.sync "restoback@1.0.5-5-gca90daa" => {"lastTagName":"restoback@1.0.5","lastVersion":"1.0.5","refCount":"5","sha":"ca90daa","isDirty":false}
-15 info Looking for changed packages since restoback@1.0.5
-16 silly checking diff restoback
-17 silly found diff in restoback/models/Menu/menu.model.js
-17 silly found diff in restoback/services/Dashboard/Sale/statistics.service.js
-17 silly found diff in restoback/services/Menu/menu.service.js
-18 verbose filtered diff [
-18 verbose filtered diff   'restoback/models/Menu/menu.model.js',
-18 verbose filtered diff   'restoback/services/Dashboard/Sale/statistics.service.js',
-18 verbose filtered diff   'restoback/services/Menu/menu.service.js'
-18 verbose filtered diff ]
-19 silly checking diff restofront
-20 silly found diff in restofront/android/capacitor.settings.gradle
-20 silly found diff in restofront/src/UI/Input.vue
-20 silly found diff in restofront/src/UI/Keyboard.vue
-20 silly found diff in restofront/src/UI/UI.js
-20 silly found diff in restofront/src/components/Menu/ActionModal.vue
-20 silly found diff in restofront/src/components/Menu/List.vue
-20 silly found diff in restofront/src/components/Tabel/ActionModal.vue
-20 silly found diff in restofront/src/components/Tabel/PaymentModal.vue
-20 silly found diff in restofront/src/stores/Dashboard/Sale/statistics.store.js
-21 verbose filtered diff [
-21 verbose filtered diff   'restofront/android/capacitor.settings.gradle',
-21 verbose filtered diff   'restofront/src/UI/Input.vue',
-21 verbose filtered diff   'restofront/src/UI/Keyboard.vue',
-21 verbose filtered diff   'restofront/src/UI/UI.js',
-21 verbose filtered diff   'restofront/src/components/Menu/ActionModal.vue',
-21 verbose filtered diff   'restofront/src/components/Menu/List.vue',
-21 verbose filtered diff   'restofront/src/components/Tabel/ActionModal.vue',
-21 verbose filtered diff   'restofront/src/components/Tabel/PaymentModal.vue',
-21 verbose filtered diff   'restofront/src/stores/Dashboard/Sale/statistics.store.js'
-21 verbose filtered diff ]
-22 verbose updated restoback
-23 verbose updated restofront
-24 verbose git-describe undefined => "restoback@1.0.5-5-gca90daa"
-25 silly git-describe parsed => {"lastTagName":"restoback@1.0.5","lastVersion":"1.0.5","refCount":"5","sha":"ca90daa","isDirty":false}
-26 info execute Skipping releases
-27 silly lifecycle No script for "preversion" in "resto-monorepo", continuing
-28 silly lifecycle No script for "preversion" in "restoback", continuing
-29 silly lifecycle No script for "preversion" in "restofront", continuing
-30 silly lifecycle No script for "version" in "restoback", continuing
-31 silly lifecycle No script for "version" in "restofront", continuing
-32 silly lifecycle No script for "version" in "resto-monorepo", continuing
-33 verbose version Updating root package-lock.json
-34 silly gitAdd [
-34 silly gitAdd   'restoback/package.json',
-34 silly gitAdd   'restoback/package-lock.json',
-34 silly gitAdd   'restofront/package.json',
-34 silly gitAdd   'restofront/package-lock.json',
-34 silly gitAdd   'package-lock.json'
-34 silly gitAdd ]
-35 silly gitCommit Publish
-35 silly gitCommit
-35 silly gitCommit  - restoback@1.0.5
-35 silly gitCommit  - restofront@1.0.7-alpha.0
-36 verbose git [
-36 verbose git   'commit',
-36 verbose git   '-F',
-36 verbose git   'C:\\Users\\Dell\\AppData\\Local\\Temp\\ec38fcaf-b22d-4962-94d1-64150654bf0b\\lerna-commit.txt'
-36 verbose git ]
-37 silly gitTag restoback@1.0.5 git tag %s -m %s
-38 verbose git [ 'tag', 'restoback@1.0.5', '-m', 'restoback@1.0.5' ]
-39 silly gitTag restofront@1.0.7-alpha.0 git tag %s -m %s
-40 verbose git [ 'tag', 'restofront@1.0.7-alpha.0', '-m', 'restofront@1.0.7-alpha.0' ]
-41 error Error: Command failed with exit code 128: git tag restoback@1.0.5 -m restoback@1.0.5
-41 error fatal: tag 'restoback@1.0.5' already exists
-41 error     at makeError (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\lib\error.js:59:11)
-41 error     at handlePromise (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\execa\index.js:114:26)
-41 error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-41 error     at async Promise.all (index 0)
-41 error     at async VersionCommand.gitCommitAndTagVersionForUpdates (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9865:11)
-41 error     at async VersionCommand.commitAndTagUpdates (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:9841:18)
-41 error     at async Promise.all (index 0)
+4 error MultipleProjectsWithSameNameError: The following projects are defined in multiple locations:
+4 error   - restoback:
+4 error     - latticoback
+4 error     - restoback
+4 error   - restofront:
+4 error     - latticofront
+4 error     - restofront
+4 error
+4 error   To fix this, set a unique name for each project in a project.json inside the project's root. If the project does not currently have a project.json, you can create one that contains only a name.
+4 error       at validateAndNormalizeProjectRootMap (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\utils\project-configuration\target-normalization.js:165:21)
+4 error       at mergeCreateNodesResults (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\utils\project-configuration-utils.js:161:71)
+4 error       at C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\utils\project-configuration-utils.js:73:85
+4 error       at async buildProjectGraphAndSourceMapsWithoutDaemon (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\project-graph.js:93:31)
+4 error       at async createProjectGraphAndSourceMapsAsync (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\project-graph.js:299:25)
+4 error       at async createProjectGraphAsync (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\nx\dist\src\project-graph\project-graph.js:225:39)
+4 error       at async detectProjects (C:\Users\Dell\Desktop\restoapp\restoapps\node_modules\lerna\dist\index.js:3344:25)

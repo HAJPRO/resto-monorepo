@@ -74,10 +74,10 @@
   <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
 
   <div class="relative z-10">
-    <div class="flex justify-between items-start mb-6">
+    <div class="flex justify-between items-start mb-2">
       <div>
-        <p class="text-[10px] font-black uppercase text-indigo-200/50 tracking-[0.2em] mb-1">Kassadagi Real Naqd Pul</p>
-        <h2 class="text-5xl font-black text-white italic tracking-tighter">
+        <p class="text-[10px] font-black uppercase text-indigo-200/50 tracking-[0.2em] mb-1">Kassadagi naqd pul</p>
+        <h2 class="text-xl font-black text-white italic tracking-tighter">
           {{ summary.totalInVault.toLocaleString() }} <span class="text-sm font-normal opacity-40 italic">UZS</span>
         </h2>
       </div>
@@ -97,7 +97,7 @@
           <div :class="`w-8 h-8 rounded-xl ${item.color}/20 flex items-center justify-center text-[12px] ${item.color.replace('bg-', 'text-')}`">
             <i :class="item.icon"></i>
           </div>
-          <p class="text-[9px] uppercase font-black text-white/50 tracking-wider leading-none">{{ item.label }}</p>
+          <p class="text-[8px] uppercase font-black text-white/50 tracking-wider leading-none">{{ item.label }}</p>
         </div>
         <p class="text-base font-black text-white leading-none tracking-tight">
           {{ item.value.toLocaleString() }}

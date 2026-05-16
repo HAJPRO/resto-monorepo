@@ -18,6 +18,7 @@ const CounterpartySchema = require("../models/Counterparty/counterparty.model.js
 const InsertSchema = require("./TMO/insert.model.js");
 const CashSchema = require("./Cash/cash.model.js");
 const CheckTemplateSchema = require("./Check/check.model.js");
+const PaymentTransactionSchema = require("./Payments/PaymentTransaction.model.js");
 
 const initModels = (db) => {
     // Modelni bazadan olish yoki yaratish funksiyasi
@@ -43,7 +44,8 @@ const initModels = (db) => {
         Counterparty: getModel('Counterparty', CounterpartySchema),
         Insert: getModel('Insert', InsertSchema),
         Cash: getModel('Cash', CashSchema),
-        CheckTemplate: getModel('CheckTemplate', CheckTemplateSchema)
+        CheckTemplate: getModel('CheckTemplate', CheckTemplateSchema),
+        PaymentTransaction: getModel('PaymentTransaction', PaymentTransactionSchema),
        
     };
 };

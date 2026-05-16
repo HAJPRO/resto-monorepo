@@ -1,19 +1,49 @@
 const BaseError = require("../../../errors/base.error");
+const redisClient = require('../../../redis/index.redis'); // Dinamik redis drayverimiz
 const moment = require("moment");
 const mongoose = require("mongoose");
 
 class StatisticsService {
+
+    // --- KESH KALITLARINI DINAMIK STRUKTURASI ---
+    _getCacheKey(tenantId, type, params = {}) {
+        if (type === 'home') {
+            return `pos:${tenantId}:stats:home`;
+        }
+        // Dashboard uchun barcha filtrlarni kalitga biriktiramiz (Sana o'zgarsa kesh ham o'zgaradi)
+        const { period = 'Hafta', startDate = 'null', endDate = 'null' } = params;
+        return `pos:${tenantId}:stats:dashboard:${period}:${startDate}:${endDate}`;
+    }
+
     /**
-     * Dashboard statistikasi
+     * Dashboard statistikasi (Keshlashtirildi)
      */
     async GetDashboardStats(req) {
         const { Cart } = req.tenantModels;
         const { period = 'Hafta', startDate, endDate } = req.query;
         
-        // Sanalar oralig'ini aniqlash (Maxsus sana yoki period bo'yicha)
+        const tenantId = req.tenantId || req.headers['tenant-id'] || "default_tenant";
+        const cacheKey = this._getCacheKey(tenantId, 'dashboard', { period, startDate, endDate });
+
+        // 1. Redis Keshni Tekshirish
+        try {
+            if (redisClient && redisClient.isOpen) {
+                const cachedData = await redisClient.get(cacheKey);
+                if (cachedData) {
+                    console.log(`[CACHE HIT] Dashboard statistikasi keshdan olindi. Tenant: ${tenantId}`);
+                    return JSON.parse(cachedData);
+                }
+            }
+        } catch (redisError) {
+            console.error(`[REDIS READ ERROR] Dashboard stats:`, redisError.message);
+        }
+
+        // Sanalar oralig'ini aniqlash
         const { start, end } = this._getDateRange(period, startDate, endDate);
 
         try {
+            console.log(`[CACHE MISS] Dashboard statistikasi MongoDB'dan hisoblanmoqda... Tenant: ${tenantId}`);
+            
             const summary = await Cart.aggregate([
                 {
                     $match: {
@@ -80,7 +110,7 @@ class StatisticsService {
 
             const chartDataRaw = await this._getChartData(req, period, start, end);
 
-            return {
+            const result = {
                 success: true,
                 msg: startDate ? "Belgilangan davr statistikasi yuklandi" : `${period}lik statistika yuklandi`,
                 data: {
@@ -96,6 +126,18 @@ class StatisticsService {
                     chartData: this._formatChartForUI(chartDataRaw, period, !!startDate)
                 }
             };
+
+            // 2. Natijani Redisga keshga yozish (300 soniya = 5 daqiqa saqlanadi)
+            try {
+                if (redisClient && redisClient.isOpen) {
+                    await redisClient.setEx(cacheKey, 300, JSON.stringify(result));
+                    console.log(`[CACHE SET] Dashboard statistikasi keshga muvaffaqiyatli yozildi.`);
+                }
+            } catch (redisWriteError) {
+                console.error(`[REDIS WRITE ERROR] Dashboard stats:`, redisWriteError.message);
+            }
+
+            return result;
         } catch (error) {
             console.error("Dashboard Error:", error);
             throw new BaseError("Statistika hisoblashda xatolik yuz berdi", 500);
@@ -103,7 +145,7 @@ class StatisticsService {
     }
 
     /**
-     * Top Mijozlar (Sana filtrini qo'shdik)
+     * Top Mijozlar
      */
     async GetTopCustomers(req) {
         const { Cart } = req.tenantModels;
@@ -114,7 +156,7 @@ class StatisticsService {
             const data = await Cart.aggregate([
                 { 
                     $match: { 
-                        createdAt: { $gte: start, $lte: end }, // Sana filtri
+                        createdAt: { $gte: start, $lte: end }, 
                         status: 'completed', 
                         customerId: { $ne: null } 
                     } 
@@ -155,7 +197,7 @@ class StatisticsService {
     }
 
     /**
-     * Top Sotuvlar (Sana filtrini qo'shdik)
+     * Top Sotuvlar
      */
     async GetTopSales(req) {
         const { Cart } = req.tenantModels;
@@ -166,7 +208,7 @@ class StatisticsService {
             const data = await Cart.aggregate([
                 { 
                     $match: { 
-                        createdAt: { $gte: start, $lte: end }, // Sana filtri
+                        createdAt: { $gte: start, $lte: end }, 
                         status: 'completed' 
                     } 
                 },
@@ -189,13 +231,151 @@ class StatisticsService {
         }
     }
 
-    // --- Private Methods ---
+    /**
+     * Home / Admin Bosh sahifa statistikasi (Keshlashtirildi)
+     */
+    async GetHomeStats(req) {
+        const tenantId = req.tenantId || req.headers['tenant-id'] || "default_tenant";
+        const cacheKey = this._getCacheKey(tenantId, 'home');
+
+        // 1. Redis Keshni Tekshirish
+        try {
+            if (redisClient && redisClient.isOpen) {
+                const cachedHome = await redisClient.get(cacheKey);
+                if (cachedHome) {
+                    console.log(`[CACHE HIT] Home stats keshdan olindi. Tenant: ${tenantId}`);
+                    return JSON.parse(cachedHome);
+                }
+            }
+        } catch (redisError) {
+            console.error(`[REDIS READ ERROR] Home stats:`, redisError.message);
+        }
+
+        try {
+            console.log(`[CACHE MISS] Home stats MongoDB'dan yuklanmoqda... Tenant: ${tenantId}`);
+            const { Cart } = req.tenantModels;
+            const now = new Date();
+            const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+
+            // Bugungi yopilgan va barcha faol buyurtmalar soni
+            const [closedCount, activeCount] = await Promise.all([
+                Cart.countDocuments({ 
+                    status: 'completed', 
+                    createdAt: { $gte: startOfDay } 
+                }),
+                Cart.countDocuments({ 
+                    status: { $in: ['pending', 'preparing', 'ready'] } 
+                })
+            ]);
+
+            // Top Ofitsiantlar
+            const topStaff = await Cart.aggregate([
+                { 
+                    $match: { 
+                        createdAt: { $gte: startOfDay }, 
+                        staffId: { $ne: null } 
+                    } 
+                },
+                { 
+                    $group: { 
+                        _id: "$staffId", 
+                        count: { $sum: 1 } 
+                    } 
+                },
+                { $sort: { count: -1 } },
+                { $limit: 3 },
+                {
+                    $lookup: {
+                        from: 'employees',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'employeeInfo'
+                    }
+                },
+                { $unwind: "$employeeInfo" },
+                {
+                    $project: {
+                        _id: 0,
+                        name: "$employeeInfo.firstname",
+                        orders: "$count"
+                    }
+                }
+            ]);
+
+            // Top Taomlar
+            const topDishes = await Cart.aggregate([
+                { $match: { createdAt: { $gte: startOfDay } } },
+                { $unwind: "$items" },
+                { 
+                    $group: { 
+                        _id: "$items.foodId", 
+                        name: { $first: "$items.name" },
+                        count: { $sum: "$items.quantity" }
+                    } 
+                },
+                { $sort: { count: -1 } },
+                { $limit: 3 },
+                {
+                    $lookup: {
+                        from: 'menus',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'menuData'
+                    }
+                },
+                { 
+                    $unwind: { 
+                        path: "$menuData", 
+                        preserveNullAndEmptyArrays: true 
+                    } 
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        name: 1,
+                        count: 1,
+                        image: "$menuData.image" 
+                    }
+                }
+            ]);
+
+            const result = {
+                success: true,
+                data: {
+                    stats: { 
+                        closedCount, 
+                        activeCount,
+                        growth: 12 
+                    },
+                    topStaff,
+                    topDishes
+                }
+            };
+
+            // 2. Natijani Redisga yozish (Tezkor o'zgarishi sababli atigi 45 soniya keshda turadi)
+            try {
+                if (redisClient && redisClient.isOpen) {
+                    await redisClient.setEx(cacheKey, 45, JSON.stringify(result));
+                    console.log(`[CACHE SET] Home stats keshga saqlandi.`);
+                }
+            } catch (redisWriteError) {
+                console.error(`[REDIS WRITE ERROR] Home stats:`, redisWriteError.message);
+            }
+
+            return result;
+
+        } catch (error) {
+            console.error("Dashboard Stats Error:", error);
+            throw new BaseError("Statistika yuklanmadi", 500);
+        }
+    }
+
+    // --- Yordamchi Metodlar ---
 
     async _getChartData(req, period, start, end) {
         const { Cart } = req.tenantModels;
         let groupId;
         
-        // Agar maxsus range tanlangan bo'lsa, avtomatik kunlar bo'yicha guruhlaymiz
         if (req.query.startDate) {
             groupId = { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } };
         } else {
@@ -245,7 +425,6 @@ class StatisticsService {
     }
 
     _getDateRange(period, startDate, endDate) {
-        // Agar startDate va endDate kelgan bo'lsa, ulardan foydalanamiz
         if (startDate && endDate) {
             return {
                 start: moment(startDate).startOf('day').toDate(),
@@ -264,126 +443,6 @@ class StatisticsService {
         }
         return { start, end };
     }
-
-   async GetHomeStats(req) {
-  try {
-    const { Cart } = req.tenantModels;
-    const now = new Date();
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-
-    // 1. Asosiy statistika (Bugungi yopilgan va barcha faol buyurtmalar)
-    const [closedCount, activeCount] = await Promise.all([
-      Cart.countDocuments({ 
-        status: 'completed', 
-        createdAt: { $gte: startOfDay } 
-      }),
-      Cart.countDocuments({ 
-        status: { $in: ['pending', 'preparing', 'ready'] } 
-      })
-    ]);
-
-    // 2. Top Ofitsiantlar (Employee modeli bilan bog'langan)
-    const topStaff = await Cart.aggregate([
-      { 
-        $match: { 
-          createdAt: { $gte: startOfDay }, 
-          staffId: { $ne: null } // staffId bor buyurtmalarni olish
-        } 
-      },
-      { 
-        $group: { 
-          _id: "$staffId", 
-          count: { $sum: 1 } 
-        } 
-      },
-      { $sort: { count: -1 } },
-      { $limit: 3 },
-      {
-        $lookup: {
-          from: 'employees', // Employee modelining bazadagi nomi
-          localField: '_id',
-          foreignField: '_id',
-          as: 'employeeInfo'
-        }
-      },
-      { $unwind: "$employeeInfo" },
-      {
-        $project: {
-          _id: 0,
-          name: "$employeeInfo.firstname",
-          orders: "$count"
-        }
-      }
-    ]);
-
-    // 3. Top Taomlar (Menu modeli bilan bog'langan)
-    const topDishes = await Cart.aggregate([
-      { $match: { createdAt: { $gte: startOfDay } } },
-      { $unwind: "$items" },
-      { 
-        $group: { 
-          _id: "$items.foodId", // Schemaingizda 'foodId' ishlatilgan
-          name: { $first: "$items.name" },
-          count: { $sum: "$items.quantity" }
-        } 
-      },
-      { $sort: { count: -1 } },
-      { $limit: 3 },
-      {
-        $lookup: {
-          from: 'menus', // Menu modelining bazadagi nomi
-          localField: '_id',
-          foreignField: '_id',
-          as: 'menuData'
-        }
-      },
-      { 
-        $unwind: { 
-          path: "$menuData", 
-          preserveNullAndEmptyArrays: true 
-        } 
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          count: 1,
-          // Menu modelidagi haqiqiy rasm, agar bo'lmasa null qaytadi
-          image: "$menuData.image" 
-        }
-      }
-    ]);
-console.log( {
-        stats: { 
-          closedCount, 
-          activeCount,
-          growth: 12 // Bu yerda mantiqiy o'sish foizini qo'shishingiz mumkin
-        },
-        topStaff,
-        topDishes
-      })
-    return {
-      success: true,
-      data: {
-        stats: { 
-          closedCount, 
-          activeCount,
-          growth: 12 // Bu yerda mantiqiy o'sish foizini qo'shishingiz mumkin
-        },
-        topStaff,
-        topDishes
-      }
-    };
-
-  } catch (error) {
-    console.error("Dashboard Stats Error:", error);
-    return {
-      success: false,
-      message: "Statistika yuklanmadi",
-      error: error.message
-    };
-  }
-}
 }
 
 module.exports = new StatisticsService();

@@ -41,10 +41,10 @@
               </span>
             </div>
 
-            <div 
+            <!-- <div 
               class="absolute bottom-1 w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full transition-all duration-500 ease-in-out"
               :class="currentRoute === nav.url ? 'opacity-100 scale-100' : 'opacity-0 scale-0 translate-y-2'"
-            ></div>
+            ></div> -->
           </div>
         </Guard>
 
