@@ -3,7 +3,11 @@
   "private": true,
   "workspaces": [
     "restoback",
-    "restofront"
+    "restofront",
+    "latticoback",
+    "latticofront",
+    "ecofront",
+    "ecoback"
   ],
   "devDependencies": {
     "lerna": "^9.0.7"
