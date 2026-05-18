@@ -15,10 +15,10 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <ion-icon :icon="restaurant" class="text-white text-xl" />
+                <ion-icon :icon="water" class="text-white text-xl" />
               </div>
               <h1 class="text-xl font-black tracking-tighter dark:text-white">
-                Resto<span class="text-indigo-600 italic">.uz</span>
+                Ecowater
               </h1>
             </div>
             <ion-menu-toggle>
@@ -194,7 +194,8 @@ import {
   filterOutline,
   calculatorOutline,
   cardOutline,
-  serverOutline
+  serverOutline,
+  water
 } from "ionicons/icons";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 

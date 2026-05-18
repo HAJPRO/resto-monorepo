@@ -1,11 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "resto.uz.app"
+    namespace "ecowater.app"
     compileSdk rootProject.ext.compileSdkVersion
-    
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "ecowater-${variant.name}-${variant.versionName}.apk"
+        }
+    }
     defaultConfig {
-        applicationId "resto.uz.app"
+        applicationId "ecowater.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -5,7 +5,7 @@
         <div class="liquid-ring"></div>
         <div class="logo-container">
           <img
-            src="../../../../assets/icon.png" 
+            src="../../../../assets/icon.jpg" 
             alt="Safy Logo"
             class="main-logo"
           />

@@ -11,8 +11,7 @@
           </div>
           <div class="flex flex-col">
             <h1 class="flex items-center text-2xl font-black tracking-tighter text-white group cursor-default mt-3">
-              <span class="relative">Resto<span class="absolute -bottom-1 left-0 w-full h-0.5 bg-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></span>
-              <span class="text-white dark:text-indigo-600 italic">.uz</span>
+              <span class="relative">Ecowater<span class="absolute -bottom-1 left-0 w-full h-0.5 bg-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></span>
             </h1>
           </div>
         </div>

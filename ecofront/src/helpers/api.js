@@ -11,12 +11,12 @@ const getBaseURL = () => {
         const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
         return isLocal 
             ? "http://localhost:5000/api/v1" 
-            : "https://restouz-core.company-erp.uz/api/v1";
+            : "https://lattico-core.company-erp.uz/api/v1";
     }
 
     // Agar Mobile (Native) bo'lsa, har doim Production serverga ulanish ma'qul
     // (Lokalda test qilish uchun kompyuter IP-sini yozish kerak, masalan: http://192.168.1.5:5000)
-    return "https://restouz-core.company-erp.uz/api/v1";
+    return "https://lattico-core.company-erp.uz/api/v1";
 };
 
 const api = axios.create({

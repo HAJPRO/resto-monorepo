@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Resto Uz</string>
-    <string name="title_activity_main">Resto Uz</string>
-    <string name="package_name">resto.uz.app</string>
-    <string name="custom_url_scheme">resto.uz.app</string>
+    <string name="app_name">Ecowater</string>
+    <string name="title_activity_main">Ecowater</string>
+    <string name="package_name">ecowater.app</string>
+    <string name="custom_url_scheme">ecowater.app</string>
 </resources>
